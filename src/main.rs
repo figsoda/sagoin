@@ -1,65 +1,37 @@
 #![forbid(unsafe_code)]
 
+mod auth;
 mod cli;
-mod types;
+mod props;
 
 use anyhow::{anyhow, Context};
 use clap::Parser;
 use ignore::WalkBuilder;
 use is_executable::IsExecutable;
-use java_properties::PropertiesIter;
-use reqwest::multipart::Part;
 use zip::{write::FileOptions, ZipWriter};
 
 use std::{
     env::set_current_dir,
     fs::File,
-    io::{self, Cursor},
-    mem,
+    io::{self, Cursor, Seek},
 };
 
-use crate::{cli::Opts, types::Submit};
+use crate::{
+    auth::negotiate_otp,
+    cli::Opts,
+    props::{read_submit, read_submit_user, Props},
+};
 
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
+fn main() -> anyhow::Result<()> {
     let opts = Opts::parse();
 
     if let Some(dir) = opts.dir {
         set_current_dir(&dir).context("Failed to set current dir")?;
     }
 
-    let mut submit = Submit::default();
-
-    PropertiesIter::new(File::open(".submit").context("Failed to read .submit")?)
-        .read_into(|k, v| {
-            match k.as_ref() {
-                "authentication.type" => submit.auth = Some(v.clone()),
-                "baseURL" => submit.base_url = Some(v.clone()),
-                "courseKey" => submit.course_key = Some(v.clone()),
-                "projectNumber" => submit.project = Some(v.clone()),
-                "submitURL" => {
-                    submit.url = Some(v);
-                    return;
-                }
-                _ => {}
-            };
-            submit.form = mem::take(&mut submit.form).text(k, v);
-        })
-        .context("Failed to parse .submit")?;
-
+    let mut props = read_submit()?;
     if let Ok(submit_user) = File::open(".submitUser") {
-        if let Err(e) = PropertiesIter::new(submit_user).read_into(|k, v| {
-            match k.as_ref() {
-                "classAccount" => submit.class = Some(v.clone()),
-                "cvsAccount" => submit.cvs = Some(v.clone()),
-                "loginName" => submit.login = Some(v.clone()),
-                "oneTimePassword" => submit.otp = Some(v.clone()),
-                _ => {}
-            }
-            submit.form = mem::take(&mut submit.form).text(k, v);
-        }) {
-            eprintln!("Warning: error when parsing .submitUser: {e}");
-        }
+        read_submit_user(&mut props, submit_user);
     }
 
     let mut zip = ZipWriter::new(Cursor::new(Vec::new()));
@@ -90,45 +62,70 @@ async fn main() -> anyhow::Result<()> {
         .context("Failed to write to the zip file")?;
     }
 
-    let cl = reqwest::Client::new();
+    let mut zip = zip
+        .finish()
+        .context("Failed to finish writing to the zip file")?;
+    zip.rewind()
+        .context("Failed to rewind to the beginning of the zip file")?;
 
-    let resp = cl
-        .post(submit.url.context("submitURL is null in .submit")?)
-        .multipart(
-            submit
-                .form
-                .text("submitClientTool", "sagoin")
-                .text("submitClientVersion", env!("CARGO_PKG_VERSION"))
-                .part(
-                    "submittedFiles",
-                    Part::bytes(
-                        zip.finish()
-                            .context("Failed to finish writing to the zip file")?
-                            .into_inner(),
-                    )
-                    .file_name("submit.zip"),
-                ),
+    submit(props, zip, true)
+}
+
+fn submit(props: Props, zip: Cursor<Vec<u8>>, reauth: bool) -> anyhow::Result<()> {
+    let mut props = props;
+
+    if reauth && (props.cvs.is_none() && props.class.is_none() || props.otp.is_none()) {
+        return submit(negotiate_otp(props)?, zip, false);
+    }
+
+    let parts = props
+        .parts
+        .add_text("submitClientTool", "sagoin")
+        .add_text("submitClientVersion", env!("CARGO_PKG_VERSION"))
+        .add_stream(
+            "submittedFiles",
+            zip.clone(),
+            Some("submit.zip"),
+            Some(
+                "application/x-zip-compressed"
+                    .parse()
+                    .context("Failed to parse the mime type for the zip")?,
+            ),
         )
-        .send()
-        .await
-        .context("Failed to send request to the submit server")?;
+        .prepare()?;
 
-    let status = resp.status();
-    if status.is_success() {
-        if let Ok(success) = resp.text().await {
-            print!("{}", success);
-        } else {
-            println!("Successfull submission received");
+    match ureq::post(props.url.as_ref().context("submitURL is null in .submit")?)
+        .set(
+            "Content-Type",
+            &format!("multipart/form-data; boundary={}", parts.boundary()),
+        )
+        .send(parts)
+    {
+        Ok(resp) => {
+            if let Ok(success) = resp.into_string() {
+                print!("{}", success);
+            } else {
+                println!("Successfull submission received");
+            }
+
+            Ok(())
         }
-
-        Ok(())
-    } else {
-        Err(if let Ok(err) = resp.text().await {
+        Err(ureq::Error::Status(500, resp)) => {
+            println!("Warning: Status code 500");
+            if let Ok(err) = resp.into_string() {
+                print!("Warning: {}", err);
+            }
+            submit(negotiate_otp(props)?, zip, false)
+        }
+        Err(ureq::Error::Status(code, resp)) => Err(if let Ok(err) = resp.into_string() {
             anyhow!("{}", err.trim_end())
-                .context(status)
+                .context(format!("Status code {code}"))
                 .context("Failed to submit project")
         } else {
-            anyhow!(status).context("Failed to submit project")
-        })
+            anyhow!("Status code {code}").context("Failed to submit project")
+        }),
+        e => e
+            .map(|_| ())
+            .context("Failed to send request to the submit server"),
     }
 }

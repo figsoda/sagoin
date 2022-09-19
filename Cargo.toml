@@ -16,20 +16,14 @@ anyhow = "1.0.65"
 ignore = "0.4.18"
 is_executable = "1.0.1"
 java-properties = "1.4.1"
+multipart = "0.18.0"
+rpassword = "7.0.0"
+ureq = "2.5.0"
 zip = "0.6.2"
 
 [dependencies.clap]
 version = "3.2.22"
 features = ["cargo", "derive", "unicode"]
-
-[dependencies.reqwest]
-version = "0.11.11"
-default-features = false
-features = ["multipart", "rustls-tls"]
-
-[dependencies.tokio]
-version = "1.21.1"
-features = ["macros", "rt-multi-thread"]
 
 [build-dependencies]
 clap = { version = "3.2.22", features = ["derive"] }
