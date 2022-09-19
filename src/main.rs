@@ -87,9 +87,9 @@ fn submit(props: Props, zip: Cursor<Vec<u8>>, reauth: bool) -> anyhow::Result<()
             zip.clone(),
             Some("submit.zip"),
             Some(
-                "application/x-zip-compressed"
+                "application/zip"
                     .parse()
-                    .context("Failed to parse the mime type for the zip")?,
+                    .context("Failed to parse application/zip as a mime type")?,
             ),
         )
         .prepare()?;
