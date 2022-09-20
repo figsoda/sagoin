@@ -1,15 +1,16 @@
-use anyhow::{anyhow, Context};
+use anyhow::{anyhow, Context, Result};
 use rpassword::prompt_password;
 
 use std::{
-    collections::HashMap,
     fs,
     io::{self, Write},
 };
 
-pub fn negotiate_otp(props: &HashMap<String, String>) -> anyhow::Result<HashMap<String, String>> {
-    match props.get("authentication.type").map(|x| x.as_str()) {
-        Some("ldap") => {
+use crate::{Props, PropsExt};
+
+pub fn negotiate_otp(props: &Props) -> Result<Props> {
+    match props.get_prop("authentication.type")?.as_str() {
+        "ldap" => {
             print!("Authenticating with ldap...\nUsername: ");
             io::stdout()
                 .flush()
@@ -25,23 +26,13 @@ pub fn negotiate_otp(props: &HashMap<String, String>) -> anyhow::Result<HashMap<
             let mut submit_user = Vec::new();
             ureq::post(&format!(
                 "{}/eclipse/NegotiateOneTimePassword",
-                props.get("baseURL").context("baseURL is null in .submit")?
+                props.get_prop("baseURL")?
             ))
             .send_form(&[
                 ("loginName", &user),
                 ("password", &pass),
-                (
-                    "courseKey",
-                    props
-                        .get("courseKey")
-                        .context("courseKey is null in .submit")?,
-                ),
-                (
-                    "projectNumber",
-                    props
-                        .get("projectNumber")
-                        .context("projectNumber is null in .submit")?,
-                ),
+                ("courseKey", props.get_prop("courseKey")?),
+                ("projectNumber", props.get_prop("projectNumber")?),
             ])
             .and_then(|resp| {
                 resp.into_reader()
@@ -54,8 +45,6 @@ pub fn negotiate_otp(props: &HashMap<String, String>) -> anyhow::Result<HashMap<
             Ok(java_properties::read(&*submit_user)?)
         }
 
-        Some(auth) => Err(anyhow!("Unsupported authentication type: {auth}")),
-
-        _ => Err(anyhow!("authentication.type is null in .submit")),
+        auth => Err(anyhow!("Unsupported authentication type: {auth}")),
     }
 }
