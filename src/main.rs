@@ -8,6 +8,7 @@ use zip::{write::FileOptions, ZipWriter};
 
 use std::{
     env::set_current_dir,
+    ffi::OsStr,
     fs::File,
     io::{self, Cursor, Seek},
 };
@@ -32,7 +33,7 @@ fn main() -> Result<()> {
         for entry in WalkBuilder::new(".").hidden(false).build() {
             let entry = entry.context("Failed to read entry")?;
             let path = entry.into_path();
-            if !path.is_file() {
+            if !path.is_file() || path.file_name() == Some(OsStr::new(".submitUser")) {
                 continue;
             }
 
