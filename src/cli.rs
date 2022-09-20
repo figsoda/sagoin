@@ -9,5 +9,8 @@ pub struct Opts {
     pub dir: Option<PathBuf>,
 
     #[clap(short, long)]
+    pub no_submit: bool,
+
+    #[clap(short, long)]
     pub open: bool,
 }
