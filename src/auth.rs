@@ -46,7 +46,7 @@ pub fn negotiate_otp(props: Props) -> anyhow::Result<Props> {
                     props
                         .project
                         .as_ref()
-                        .context("courseKey is null in .submit")?,
+                        .context("projectNumber is null in .submit")?,
                 ),
             ])
             .and_then(|resp| {
