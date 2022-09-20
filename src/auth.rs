@@ -2,14 +2,13 @@ use anyhow::{anyhow, Context};
 use rpassword::prompt_password;
 
 use std::{
+    collections::HashMap,
     fs,
     io::{self, Write},
 };
 
-use crate::props::{read_submit, read_submit_user, Props};
-
-pub fn negotiate_otp(props: Props) -> anyhow::Result<Props> {
-    match props.auth.as_deref() {
+pub fn negotiate_otp(props: &HashMap<String, String>) -> anyhow::Result<HashMap<String, String>> {
+    match props.get("authentication.type").map(|x| x.as_str()) {
         Some("ldap") => {
             print!("Authenticating with ldap...\nUsername: ");
             io::stdout()
@@ -26,10 +25,7 @@ pub fn negotiate_otp(props: Props) -> anyhow::Result<Props> {
             let mut submit_user = Vec::new();
             ureq::post(&format!(
                 "{}/eclipse/NegotiateOneTimePassword",
-                props
-                    .base_url
-                    .as_ref()
-                    .context("baseURL is null in .submit")?
+                props.get("baseURL").context("baseURL is null in .submit")?
             ))
             .send_form(&[
                 ("loginName", &user),
@@ -37,15 +33,13 @@ pub fn negotiate_otp(props: Props) -> anyhow::Result<Props> {
                 (
                     "courseKey",
                     props
-                        .course_key
-                        .as_ref()
+                        .get("courseKey")
                         .context("courseKey is null in .submit")?,
                 ),
                 (
                     "projectNumber",
                     props
-                        .project
-                        .as_ref()
+                        .get("projectNumber")
                         .context("projectNumber is null in .submit")?,
                 ),
             ])
@@ -56,11 +50,8 @@ pub fn negotiate_otp(props: Props) -> anyhow::Result<Props> {
             })
             .context("Failed to negotiate one-time password with the server")?;
 
-            let mut submit = read_submit()?;
-            read_submit_user(&mut submit, &*submit_user);
-            fs::write(".submitUser", submit_user).context("Failed to write to .submitUser")?;
-
-            Ok(submit)
+            fs::write(".submitUser", &submit_user).context("Failed to write to .submitUser")?;
+            Ok(java_properties::read(&*submit_user)?)
         }
 
         Some(auth) => Err(anyhow!("Unsupported authentication type: {auth}")),

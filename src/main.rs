@@ -2,36 +2,28 @@
 
 mod auth;
 mod cli;
-mod props;
 
 use anyhow::{anyhow, Context};
 use clap::Parser;
 use ignore::WalkBuilder;
 use is_executable::IsExecutable;
+use multipart::client::lazy::Multipart;
 use zip::{write::FileOptions, ZipWriter};
 
 use std::{
+    collections::HashMap,
     env::set_current_dir,
     fs::File,
     io::{self, Cursor, Seek},
 };
 
-use crate::{
-    auth::negotiate_otp,
-    cli::Opts,
-    props::{read_submit, read_submit_user, Props},
-};
+use crate::{auth::negotiate_otp, cli::Opts};
 
 fn main() -> anyhow::Result<()> {
     let opts = Opts::parse();
 
     if let Some(dir) = opts.dir {
         set_current_dir(&dir).context("Failed to set current dir")?;
-    }
-
-    let mut props = read_submit()?;
-    if let Ok(submit_user) = File::open(".submitUser") {
-        read_submit_user(&mut props, submit_user);
     }
 
     let mut zip = ZipWriter::new(Cursor::new(Vec::new()));
@@ -68,18 +60,38 @@ fn main() -> anyhow::Result<()> {
     zip.rewind()
         .context("Failed to rewind to the beginning of the zip file")?;
 
-    submit(props, zip, true)
+    submit(
+        File::open(".submitUser")
+            .ok()
+            .and_then(|file| java_properties::read(file).ok())
+            .unwrap_or_default(),
+        &java_properties::read(File::open(".submit").context("Failed to read .submit")?)
+            .context("Failed to parse .submit")?,
+        zip,
+        true,
+    )
 }
 
-fn submit(props: Props, zip: Cursor<Vec<u8>>, reauth: bool) -> anyhow::Result<()> {
-    let mut props = props;
-
-    if reauth && (props.cvs.is_none() && props.class.is_none() || props.otp.is_none()) {
-        return submit(negotiate_otp(props)?, zip, false);
+fn submit(
+    user_props: HashMap<String, String>,
+    props: &HashMap<String, String>,
+    zip: Cursor<Vec<u8>>,
+    reauth: bool,
+) -> anyhow::Result<()> {
+    if reauth
+        && (!user_props.contains_key("cvsAccount") && !user_props.contains_key("classAccount")
+            || !user_props.contains_key("oneTimePassword"))
+    {
+        return submit(negotiate_otp(props)?, props, zip, false);
     }
 
-    let parts = props
-        .parts
+    let mut parts = Multipart::new();
+
+    for (k, v) in user_props.iter().chain(props) {
+        parts.add_text(k.to_owned(), v);
+    }
+
+    let parts = parts
         .add_text("submitClientTool", "sagoin")
         .add_text("submitClientVersion", env!("CARGO_PKG_VERSION"))
         .add_stream(
@@ -94,12 +106,16 @@ fn submit(props: Props, zip: Cursor<Vec<u8>>, reauth: bool) -> anyhow::Result<()
         )
         .prepare()?;
 
-    match ureq::post(props.url.as_ref().context("submitURL is null in .submit")?)
-        .set(
-            "Content-Type",
-            &format!("multipart/form-data; boundary={}", parts.boundary()),
-        )
-        .send(parts)
+    match ureq::post(
+        props
+            .get("submitURL")
+            .context("submitURL is null in .submit")?,
+    )
+    .set(
+        "Content-Type",
+        &format!("multipart/form-data; boundary={}", parts.boundary()),
+    )
+    .send(parts)
     {
         Ok(resp) => {
             if let Ok(success) = resp.into_string() {
@@ -115,7 +131,7 @@ fn submit(props: Props, zip: Cursor<Vec<u8>>, reauth: bool) -> anyhow::Result<()
             if let Ok(err) = resp.into_string() {
                 print!("Warning: {}", err);
             }
-            submit(negotiate_otp(props)?, zip, false)
+            submit(negotiate_otp(props)?, props, zip, false)
         }
         Err(ureq::Error::Status(code, resp)) => Err(if let Ok(err) = resp.into_string() {
             anyhow!("{}", err.trim_end())
