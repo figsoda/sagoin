@@ -13,11 +13,13 @@ categories = []
 
 [dependencies]
 anyhow = "1.0.65"
+icalendar = { version = "0.13.1", features = ["parser"] }
 ignore = "0.4.18"
 is_executable = "1.0.1"
 java-properties = "1.4.1"
 rpassword = "7.0.0"
 ureq = "2.5.0"
+webbrowser = "0.8.0"
 zip = { version = "0.6.2", default-features = false }
 
 [dependencies.clap]

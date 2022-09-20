@@ -7,4 +7,7 @@ use std::path::PathBuf;
 pub struct Opts {
     #[clap(value_name = "directory")]
     pub dir: Option<PathBuf>,
+
+    #[clap(short, long)]
+    pub open: bool,
 }

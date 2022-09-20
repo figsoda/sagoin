@@ -5,6 +5,7 @@ mod cli;
 
 use anyhow::{anyhow, Context};
 use clap::Parser;
+use icalendar::parser::{read_calendar_simple, unfold};
 use ignore::WalkBuilder;
 use is_executable::IsExecutable;
 use multipart::client::lazy::Multipart;
@@ -25,6 +26,9 @@ fn main() -> anyhow::Result<()> {
     if let Some(dir) = opts.dir {
         set_current_dir(&dir).context("Failed to set current dir")?;
     }
+
+    let props = java_properties::read(File::open(".submit").context("Failed to read .submit")?)
+        .context("Failed to parse .submit")?;
 
     let mut zip = ZipWriter::new(Cursor::new(Vec::new()));
     zip.set_comment("");
@@ -65,11 +69,16 @@ fn main() -> anyhow::Result<()> {
             .ok()
             .and_then(|file| java_properties::read(file).ok())
             .unwrap_or_default(),
-        &java_properties::read(File::open(".submit").context("Failed to read .submit")?)
-            .context("Failed to parse .submit")?,
+        &props,
         zip,
         true,
-    )
+    )?;
+
+    if opts.open {
+        webbrowser::open(&get_course_url(&props)?).context("Failed to open the web browser")?;
+    }
+
+    Ok(())
 }
 
 fn submit(
@@ -144,4 +153,60 @@ fn submit(
             .map(|_| ())
             .context("Failed to send request to the submit server"),
     }
+}
+
+fn get_course_url(props: &HashMap<String, String>) -> anyhow::Result<String> {
+    let proj = format!(
+        "{} project {}: ",
+        props
+            .get("courseName")
+            .context("courseName is null in .submit")?,
+        props
+            .get("projectNumber")
+            .context("projectNumber is null in .submit")?
+    );
+
+    read_calendar_simple(&unfold(
+        &ureq::get(&format!(
+            "{}/feed/CourseCalendar?courseKey={}",
+            props.get("baseURL").context("baseURL is null in .submit")?,
+            props
+                .get("courseKey")
+                .context("courseKey is null in .submit")?,
+        ))
+        .call()
+        .context("Failed to download the course calendar")?
+        .into_string()
+        .context("Failed to parse the course calendar")?,
+    ))
+    .map_err(|e| anyhow!("{}", e).context("Failed to parse the course calendar"))?
+    .get(0)
+    .and_then(|root| {
+        root.components.iter().find_map(|component| {
+            let mut url = None;
+            let mut found = false;
+
+            for prop in component.properties.iter() {
+                match prop.name.as_str() {
+                    "SUMMARY" => {
+                        if prop.val.as_str().starts_with(&proj) {
+                            found = true;
+                        } else {
+                            return None;
+                        }
+                    }
+
+                    "URL" => url = Some(prop.val.to_string()),
+                    _ => {}
+                }
+            }
+
+            if found {
+                url
+            } else {
+                None
+            }
+        })
+    })
+    .context("Failed to find the course url")
 }
