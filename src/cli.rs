@@ -3,14 +3,14 @@ use clap::Parser;
 use std::path::PathBuf;
 
 #[derive(Parser)]
-#[clap(version)]
+#[command(version)]
 pub struct Opts {
-    #[clap(value_name = "directory")]
+    #[arg(value_name = "directory")]
     pub dir: Option<PathBuf>,
 
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub no_submit: bool,
 
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub open: bool,
 }
