@@ -1,4 +1,4 @@
-use clap::{CommandFactory, ValueEnum};
+use clap::CommandFactory;
 use clap_complete::{generate_to, Shell};
 
 use std::{env, fs::create_dir_all, path::Path};

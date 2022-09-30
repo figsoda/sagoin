@@ -2,6 +2,7 @@
 
 pub mod auth;
 pub mod cli;
+pub mod cred;
 
 use anyhow::{anyhow, Context, Result};
 use icalendar::parser::{read_calendar_simple, unfold};
@@ -9,7 +10,7 @@ use multipart::client::lazy::Multipart;
 
 use std::{collections::HashMap, io::Cursor};
 
-use crate::auth::negotiate_otp;
+use crate::{auth::negotiate_otp, cli::Opts};
 
 pub type Props = HashMap<String, String>;
 
@@ -23,12 +24,18 @@ impl PropsExt for Props {
     }
 }
 
-pub fn submit(user_props: Props, props: &Props, zip: Cursor<Vec<u8>>, reauth: bool) -> Result<()> {
+pub fn submit(
+    user_props: Props,
+    props: &Props,
+    opts: &Opts,
+    zip: Cursor<Vec<u8>>,
+    reauth: bool,
+) -> Result<()> {
     if reauth
         && (!user_props.contains_key("cvsAccount") && !user_props.contains_key("classAccount")
             || !user_props.contains_key("oneTimePassword"))
     {
-        return submit(negotiate_otp(props)?, props, zip, false);
+        return submit(negotiate_otp(props, opts)?, props, opts, zip, false);
     }
 
     let mut parts = Multipart::new();
@@ -73,7 +80,7 @@ pub fn submit(user_props: Props, props: &Props, zip: Cursor<Vec<u8>>, reauth: bo
             if let Ok(err) = resp.into_string() {
                 print!("Warning: {}", err);
             }
-            submit(negotiate_otp(props)?, props, zip, false)
+            submit(negotiate_otp(props, opts)?, props, opts, zip, false)
         }
         Err(ureq::Error::Status(code, resp)) => Err(if let Ok(err) = resp.into_string() {
             anyhow!("{}", err.trim_end())

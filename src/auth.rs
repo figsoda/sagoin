@@ -1,27 +1,19 @@
 use anyhow::{anyhow, Context, Result};
-use rpassword::prompt_password;
 
-use std::{
-    fs,
-    io::{self, Write},
+use std::fs;
+
+use crate::{
+    cli::Opts,
+    cred::{resolve_password, resolve_username},
+    Props, PropsExt,
 };
 
-use crate::{Props, PropsExt};
-
-pub fn negotiate_otp(props: &Props) -> Result<Props> {
+pub fn negotiate_otp(props: &Props, opts: &Opts) -> Result<Props> {
     match props.get_prop("authentication.type")?.as_str() {
         "ldap" => {
-            print!("Authenticating with ldap...\nUsername: ");
-            io::stdout()
-                .flush()
-                .context("Failed to prompt for username")?;
-
-            let mut user = String::new();
-            io::stdin()
-                .read_line(&mut user)
-                .context("Failed to prompt for username")?;
-
-            let pass = prompt_password("Password: ").context("Failed to prompt for password")?;
+            println!("Authenticating with ldap...");
+            let user = resolve_username(opts)?;
+            let pass = resolve_password(opts)?;
 
             let mut submit_user = Vec::new();
             ureq::post(&format!(

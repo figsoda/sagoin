@@ -18,8 +18,8 @@ use sagoin::{cli::Opts, get_course_url, submit};
 fn main() -> Result<()> {
     let opts = Opts::parse();
 
-    if let Some(dir) = opts.dir {
-        set_current_dir(&dir).context("Failed to set current dir")?;
+    if let Some(dir) = &opts.dir {
+        set_current_dir(dir).context("Failed to set current dir")?;
     }
 
     let props = java_properties::read(File::open(".submit").context("Failed to read .submit")?)
@@ -66,6 +66,7 @@ fn main() -> Result<()> {
                 .and_then(|file| java_properties::read(file).ok())
                 .unwrap_or_default(),
             &props,
+            &opts,
             zip,
             true,
         )?;
