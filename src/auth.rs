@@ -8,7 +8,7 @@ use crate::{
     Props, PropsExt,
 };
 
-pub fn negotiate_otp(props: &Props, opts: &Opts) -> Result<Props> {
+pub(crate) fn negotiate_otp(props: &Props, opts: &Opts) -> Result<Props> {
     match props.get_prop("authentication.type")?.as_str() {
         "ldap" => {
             println!("Authenticating with ldap...");

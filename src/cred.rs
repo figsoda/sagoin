@@ -9,7 +9,7 @@ use std::{
 
 use crate::{cli::InputType, Opts};
 
-pub fn resolve_username(opts: &Opts) -> Result<String> {
+pub(crate) fn resolve_username(opts: &Opts) -> Result<String> {
     Ok(
         if let Some(user) = resolve_cred(&opts.username, opts.username_type) {
             user
@@ -29,7 +29,7 @@ pub fn resolve_username(opts: &Opts) -> Result<String> {
     )
 }
 
-pub fn resolve_password(opts: &Opts) -> Result<String> {
+pub(crate) fn resolve_password(opts: &Opts) -> Result<String> {
     if let Some(pass) = resolve_cred(&opts.password, opts.password_type) {
         Ok(pass)
     } else {

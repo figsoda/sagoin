@@ -1,8 +1,8 @@
 #![forbid(unsafe_code)]
 
-pub mod auth;
+mod auth;
 pub mod cli;
-pub mod cred;
+mod cred;
 
 use anyhow::{anyhow, Context, Result};
 use icalendar::parser::{read_calendar_simple, unfold};
@@ -12,7 +12,7 @@ use std::{collections::HashMap, io::Cursor};
 
 use crate::{auth::negotiate_otp, cli::Opts};
 
-pub type Props = HashMap<String, String>;
+type Props = HashMap<String, String>;
 
 trait PropsExt {
     fn get_prop(&self, key: &'static str) -> Result<&String>;
