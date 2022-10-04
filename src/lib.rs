@@ -68,17 +68,17 @@ pub fn submit(
     {
         Ok(resp) => {
             if let Ok(success) = resp.into_string() {
-                print!("{}", success);
+                eprint!("{success}");
             } else {
-                println!("Successfull submission received");
+                eprintln!("Successfull submission received");
             }
 
             Ok(())
         }
         Err(ureq::Error::Status(500, resp)) => {
-            println!("Warning: Status code 500");
+            eprintln!("Warning: Status code 500");
             if let Ok(err) = resp.into_string() {
-                print!("Warning: {}", err);
+                eprint!("Warning: {err}");
             }
             submit(negotiate_otp(props, opts)?, props, opts, zip, false)
         }
