@@ -7,7 +7,7 @@
 [![ci](https://img.shields.io/github/workflow/status/figsoda/sagoin/ci?label=ci&logo=github-actions&style=flat-square)](https://github.com/figsoda/sagoin/actions?query=workflow:ci)
 
 `sagoin` is a command-line submission tool for the UMD CS Submission Server.
-This project is largely inspired by and aims to be the spiritual successor of the [CommandLineSubmission program](https://github.com/billpugh/marmoset/tree/master/CommandLineSubmission) from the [marmoset project](https://marmoset.cs.umd.edu) by [Bill Pugh](https://www.cs.umd.edu/~pugh),
+This project is largely inspired by and aims to be the spiritual successor of the [CommandLineSubmission] program from the [marmoset](https://marmoset.cs.umd.edu) project by [Professor William Pugh](https://www.cs.umd.edu/~pugh),
 hence the [AGPL-3.0-or-later] license and the name [sagoin](https://en.wiktionary.org/wiki/sagoin),
 which refers to a [marmoset](https://en.wikipedia.org/wiki/Marmoset).
 
@@ -49,6 +49,20 @@ Options:
   -V, --version               Print version information
 ```
 
+## Feature comparison
+
+Freature | Sagoin | [CommandLineSubmission] | [CourseProjectManager Eclispe plugin](https://www.cs.umd.edu/~pugh/eclipse)
+-|-|-|-
+Submission | ✓ | ✓ | ✓
+Work without Eclipse | ✓ | ✓ | ✗
+LDAP authentication | ✓ | ✓ | ✓
+OpenID authentication | ✗ | ✓ | ✓
+CVS integration | ✗ | ✗ | ✓
+CVS ignore | ✗ | ✓ | ✓
+Git ignore | ✓ | ✗ | ✗
+Custom credential input | ✓ | ✗ | ✗
+Open project page | ✓ | ✗ | ✗
+
 
 ## Changelog
 See [CHANGELOG.md](CHANGELOG.md)
@@ -60,4 +74,5 @@ This repository is licensed under [GNU Affero General Public License v3.0 or lat
 
 
 [AGPL-3.0-or-later]: https://spdx.org/licenses/AGPL-3.0-or-later.html
+[CommandLineSubmission]: https://github.com/billpugh/marmoset/tree/master/CommandLineSubmission
 [crate]: https://crates.io/crates/sagoin
