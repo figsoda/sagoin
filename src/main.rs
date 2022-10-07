@@ -33,6 +33,7 @@ fn main() -> Result<()> {
         for entry in WalkBuilder::new(".").hidden(false).build() {
             let entry = entry.context("Failed to read entry")?;
             let path = entry.into_path();
+            let path = path.strip_prefix(".")?;
             if !path.is_file() || path.file_name() == Some(OsStr::new(".submitUser")) {
                 continue;
             }
@@ -48,7 +49,7 @@ fn main() -> Result<()> {
             .context("Failed to write to the zip file")?;
 
             io::copy(
-                &mut File::open(&path).context(format!("Failed to read {}", path.display()))?,
+                &mut File::open(path).context(format!("Failed to read {}", path.display()))?,
                 &mut zip,
             )
             .context("Failed to write to the zip file")?;
