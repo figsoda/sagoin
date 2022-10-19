@@ -46,6 +46,24 @@ pub struct Opts {
         default_value = "text"
     )]
     pub(crate) password_type: InputType,
+
+    /// Command to run before submission
+    #[arg(
+        short = 's',
+        long,
+        env = "SAGOIN_PRE_SUBMIT_HOOK",
+        value_name = "command"
+    )]
+    pub(crate) pre_submit_hook: Option<String>,
+
+    /// Command to run after successful submissions
+    #[arg(
+        short = 'S',
+        long,
+        env = "SAGOIN_POST_SUBMIT_HOOK",
+        value_name = "command"
+    )]
+    pub(crate) post_submit_hook: Option<String>,
 }
 
 #[derive(Clone, Copy, ValueEnum)]

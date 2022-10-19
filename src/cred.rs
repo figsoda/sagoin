@@ -4,10 +4,10 @@ use rpassword::read_password;
 use std::{
     fs::read_to_string,
     io::{self, Write},
-    process::{Command, Stdio},
+    process::{Output, Stdio},
 };
 
-use crate::{cli::InputType, Opts};
+use crate::{cli::InputType, cmd, Opts};
 
 pub(crate) fn resolve_username(opts: &Opts) -> Result<String> {
     Ok(
@@ -51,34 +51,23 @@ fn resolve_cred(cred: &Option<String>, t: InputType) -> Option<String> {
                 InputType::File => read_to_string(input)
                     .map_err(|e| eprintln!("Warning: Failed to read {input}:\n{e}"))
                     .ok(),
-                InputType::Command => Command::new(
-                    #[cfg(unix)]
-                    "sh",
-                    #[cfg(windows)]
-                    "cmd.exe",
-                )
-                .arg(
-                    #[cfg(unix)]
-                    "-c",
-                    #[cfg(windows)]
-                    "/c",
-                )
-                .arg(input)
-                .stderr(Stdio::inherit())
-                .stdin(Stdio::inherit())
-                .output()
-                .map_err(|e| eprintln!("Warning: Failed to execute command: {e}"))
-                .ok()
-                .and_then(|output| {
-                    if output.status.success() {
-                        String::from_utf8(output.stdout)
-                            .map_err(|e| eprintln!("Warning: {e}"))
-                            .ok()
-                    } else {
-                        eprintln!("Warning: command exited with {}", output.status);
-                        None
-                    }
-                }),
+                InputType::Command => cmd::shell()
+                    .arg(input)
+                    .stderr(Stdio::inherit())
+                    .stdin(Stdio::inherit())
+                    .output()
+                    .map_err(|e| eprintln!("Warning: Failed to execute command: {e}"))
+                    .ok()
+                    .and_then(|Output { status, stdout, .. }| {
+                        if status.success() {
+                            String::from_utf8(stdout)
+                                .map_err(|e| eprintln!("Warning: {e}"))
+                                .ok()
+                        } else {
+                            eprintln!("Warning: command failed with exit code {status}");
+                            None
+                        }
+                    }),
             }
         }
     })

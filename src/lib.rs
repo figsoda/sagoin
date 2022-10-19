@@ -2,6 +2,7 @@
 
 mod auth;
 pub mod cli;
+mod cmd;
 mod cred;
 
 use anyhow::{anyhow, Context, Result};
@@ -10,7 +11,7 @@ use multipart::client::lazy::Multipart;
 
 use std::{collections::HashMap, io::Cursor};
 
-use crate::{auth::negotiate_otp, cli::Opts};
+use crate::{auth::negotiate_otp, cli::Opts, cmd::run_hook};
 
 type Props = HashMap<String, String>;
 
@@ -24,7 +25,15 @@ impl PropsExt for Props {
     }
 }
 
-pub fn submit(
+pub fn submit(user_props: Props, props: &Props, opts: &Opts, zip: Cursor<Vec<u8>>) -> Result<()> {
+    run_hook(&opts.pre_submit_hook, "pre-submit")?;
+    submit_project(user_props, props, opts, zip, true)?;
+    run_hook(&opts.post_submit_hook, "post-submit")?;
+
+    Ok(())
+}
+
+fn submit_project(
     user_props: Props,
     props: &Props,
     opts: &Opts,
@@ -35,13 +44,13 @@ pub fn submit(
         && (!user_props.contains_key("cvsAccount") && !user_props.contains_key("classAccount")
             || !user_props.contains_key("oneTimePassword"))
     {
-        return submit(negotiate_otp(props, opts)?, props, opts, zip, false);
+        return submit_project(negotiate_otp(props, opts)?, props, opts, zip, false);
     }
 
     let mut parts = Multipart::new();
 
     for (k, v) in user_props.iter().chain(props) {
-        parts.add_text(k.to_owned(), v);
+        parts.add_text(k.clone(), v);
     }
 
     let parts = parts
@@ -80,7 +89,7 @@ pub fn submit(
             if let Ok(err) = resp.into_string() {
                 eprint!("Warning: {err}");
             }
-            submit(negotiate_otp(props, opts)?, props, opts, zip, false)
+            submit_project(negotiate_otp(props, opts)?, props, opts, zip, false)
         }
         Err(ureq::Error::Status(code, resp)) => Err(if let Ok(err) = resp.into_string() {
             anyhow!("{}", err.trim_end())

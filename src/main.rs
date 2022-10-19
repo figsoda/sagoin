@@ -69,7 +69,6 @@ fn main() -> Result<()> {
             &props,
             &opts,
             zip,
-            true,
         )?;
     }
 
