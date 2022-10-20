@@ -8,7 +8,6 @@ use zip::{write::FileOptions, ZipWriter};
 
 use std::{
     env::set_current_dir,
-    ffi::OsStr,
     fs::File,
     io::{self, Cursor, Seek},
 };
@@ -34,7 +33,7 @@ fn main() -> Result<()> {
             let entry = entry.context("Failed to read entry")?;
             let path = entry.into_path();
             let path = path.strip_prefix(".")?;
-            if !path.is_file() || path.file_name() == Some(OsStr::new(".submitUser")) {
+            if !path.is_file() || matches!(path.file_name(), Some(name) if name == ".submitUser") {
                 continue;
             }
 

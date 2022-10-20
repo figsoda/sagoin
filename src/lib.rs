@@ -84,6 +84,7 @@ fn submit_project(
 
             Ok(())
         }
+
         Err(ureq::Error::Status(500, resp)) => {
             eprintln!("Warning: Status code 500");
             if let Ok(err) = resp.into_string() {
@@ -91,6 +92,7 @@ fn submit_project(
             }
             submit_project(negotiate_otp(props, opts)?, props, opts, zip, false)
         }
+
         Err(ureq::Error::Status(code, resp)) => Err(if let Ok(err) = resp.into_string() {
             anyhow!("{}", err.trim_end())
                 .context(format!("Status code {code}"))
@@ -98,6 +100,7 @@ fn submit_project(
         } else {
             anyhow!("Status code {code}").context("Failed to submit project")
         }),
+
         Err(e) => Err(e).context("Failed to send request to the submit server"),
     }
 }
@@ -120,7 +123,7 @@ pub fn get_course_url(props: &Props) -> Result<String> {
         .into_string()
         .context("Failed to parse the course calendar")?,
     ))
-    .map_err(|e| anyhow!("{}", e).context("Failed to parse the course calendar"))?
+    .map_err(|e| anyhow!("{e}").context("Failed to parse the course calendar"))?
     .get(0)
     .and_then(|root| {
         root.components.iter().find_map(|component| {
@@ -138,6 +141,7 @@ pub fn get_course_url(props: &Props) -> Result<String> {
                     }
 
                     "URL" => url = Some(prop.val.to_string()),
+
                     _ => {}
                 }
             }
