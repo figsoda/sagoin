@@ -79,7 +79,7 @@ fn submit_project(
             if let Ok(success) = resp.into_string() {
                 eprint!("{success}");
             } else {
-                eprintln!("Successfull submission received");
+                eprintln!("Successful submission received");
             }
 
             Ok(())

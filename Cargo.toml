@@ -24,7 +24,7 @@ zip = { version = "0.6.2", default-features = false }
 
 [dependencies.clap]
 version = "4.0.8"
-features = ["cargo", "derive", "env", "unicode"]
+features = ["cargo", "derive", "env", "unicode", "wrap_help"]
 
 [dependencies.multipart]
 version = "0.18.0"

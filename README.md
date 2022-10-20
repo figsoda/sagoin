@@ -40,20 +40,20 @@ Arguments:
 
 Options:
   -n, --no-submit                   Don't submit the project
-  -o, --open                        Open project page
+  -o, --open                        Open the project page in a web browser
   -u, --username <username>         Specify the username for authentication, see --username-type for more information [env: SAGOIN_USERNAME=]
   -U, --username-type <type>        Specify the type for the username [env: SAGOIN_USERNAME_TYPE=] [default: text] [possible values: command, file, text]
   -p, --password <password>         Specify the password for authentication, see --password-type for more information [env: SAGOIN_PASSWORD=]
   -P, --password-type <type>        Specify the type for the password [env: SAGOIN_PASSWORD_TYPE=] [default: text] [possible values: command, file, text]
   -s, --pre-submit-hook <command>   Command to run before submission [env: SAGOIN_PRE_SUBMIT_HOOK=]
   -S, --post-submit-hook <command>  Command to run after successful submissions [env: SAGOIN_POST_SUBMIT_HOOK=]
-  -h, --help                        Print help information
+  -h, --help                        Print help information (use `-h` for a summary, use `--help` for more detail)
   -V, --version                     Print version information
 ```
 
 ## Feature comparison
 
-Freature | Sagoin | [CommandLineSubmission] | [CourseProjectManager Eclispe plugin](https://www.cs.umd.edu/~pugh/eclipse)
+Freature | Sagoin | [CommandLineSubmission] | [CourseProjectManager Eclipse plugin](https://www.cs.umd.edu/~pugh/eclipse)
 -|-|-|-
 Submission | ✓ | ✓ | ✓
 Work without Eclipse | ✓ | ✓ | ✗
