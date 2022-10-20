@@ -67,7 +67,7 @@ fn main() -> Result<()> {
                 .unwrap_or_default(),
             &props,
             &opts,
-            zip,
+            &zip.into_inner(),
         )?;
     }
 

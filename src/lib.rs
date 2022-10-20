@@ -9,7 +9,7 @@ use anyhow::{anyhow, Context, Result};
 use icalendar::parser::{read_calendar_simple, unfold};
 use multipart::client::lazy::Multipart;
 
-use std::{collections::HashMap, io::Cursor};
+use std::collections::HashMap;
 
 use crate::{auth::negotiate_otp, cli::Opts, cmd::run_hook};
 
@@ -25,7 +25,7 @@ impl PropsExt for Props {
     }
 }
 
-pub fn submit(user_props: Props, props: &Props, opts: &Opts, zip: Cursor<Vec<u8>>) -> Result<()> {
+pub fn submit(user_props: Props, props: &Props, opts: &Opts, zip: &[u8]) -> Result<()> {
     run_hook(&opts.pre_submit_hook, "pre-submit")?;
     submit_project(user_props, props, opts, zip, true)?;
     run_hook(&opts.post_submit_hook, "post-submit")?;
@@ -37,7 +37,7 @@ fn submit_project(
     user_props: Props,
     props: &Props,
     opts: &Opts,
-    zip: Cursor<Vec<u8>>,
+    zip: &[u8],
     reauth: bool,
 ) -> Result<()> {
     if reauth
@@ -58,7 +58,7 @@ fn submit_project(
         .add_text("submitClientVersion", env!("CARGO_PKG_VERSION"))
         .add_stream(
             "submittedFiles",
-            zip.clone(),
+            zip,
             Some("submit.zip"),
             Some(
                 "application/zip"
