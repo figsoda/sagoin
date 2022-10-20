@@ -85,7 +85,7 @@ fn submit_project(
             Ok(())
         }
 
-        Err(ureq::Error::Status(500, resp)) => {
+        Err(ureq::Error::Status(500, resp)) if reauth => {
             eprintln!("Warning: Status code 500");
             if let Ok(err) = resp.into_string() {
                 eprint!("Warning: {err}");
