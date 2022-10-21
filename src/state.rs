@@ -53,3 +53,13 @@ impl State<io::Sink> {
         }
     }
 }
+
+#[cfg(test)]
+impl State<Vec<u8>> {
+    pub(crate) fn buffer() -> State<Vec<u8>> {
+        Self {
+            color: false,
+            out: Vec::new(),
+        }
+    }
+}

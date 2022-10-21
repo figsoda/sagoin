@@ -50,13 +50,19 @@ mod tests {
 
     #[test]
     fn run_hook_none() {
-        let mut state = State::sink();
-        assert!(state.run_hook(&None, "").is_ok());
-        assert!(state.run_hook(&Some("".into()), "").is_ok());
+        let mut state = State::buffer();
+
+        assert!(state.run_hook(&None, "foo").is_ok());
+        assert!(state.out.is_empty());
+
+        assert!(state.run_hook(&Some("".into()), "foo").is_ok());
+        assert!(state.out.is_empty());
     }
 
     #[test]
     fn run_hook_echo() {
-        assert!(State::sink().run_hook(&Some("echo foo".into()), "").is_ok());
+        let mut state = State::buffer();
+        assert!(state.run_hook(&Some("echo foo".into()), "bar").is_ok());
+        assert!(std::str::from_utf8(&state.out).unwrap().contains("bar"));
     }
 }

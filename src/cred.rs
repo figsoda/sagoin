@@ -93,7 +93,7 @@ mod tests {
         assert!(State::sink()
             .resolve_cred(&Some("echo foo".into()), InputType::Command)
             .unwrap()
-            .starts_with("foo"))
+            .starts_with("foo"));
     }
 
     #[test]
@@ -102,7 +102,7 @@ mod tests {
         write!(file, "foo").unwrap();
         assert_eq!(
             State::sink().resolve_cred(&Some(file.path().into()), InputType::File),
-            Some("foo".into())
+            Some("foo".into()),
         );
     }
 
@@ -110,7 +110,7 @@ mod tests {
     fn resolve_cred_text() {
         assert_eq!(
             State::sink().resolve_cred(&Some("foo".into()), InputType::Text),
-            Some("foo".into())
+            Some("foo".into()),
         );
     }
 }
