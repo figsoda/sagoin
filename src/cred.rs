@@ -76,3 +76,45 @@ fn resolve_cred(cred: &Option<OsString>, t: InputType) -> Option<String> {
             }),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use tempfile::NamedTempFile;
+
+    use std::io::Write;
+
+    use crate::cli::InputType;
+
+    use super::resolve_cred;
+
+    #[test]
+    fn resolve_cred_none() {
+        assert_eq!(resolve_cred(&None, InputType::Text), None);
+        assert_eq!(resolve_cred(&Some("".into()), InputType::Text), None);
+    }
+
+    #[test]
+    fn resolve_cred_text() {
+        assert_eq!(
+            resolve_cred(&Some("foo".into()), InputType::Text),
+            Some("foo".into())
+        );
+    }
+
+    #[test]
+    fn resolve_cred_file() {
+        let mut file = NamedTempFile::new().unwrap();
+        write!(file, "foo").unwrap();
+        assert_eq!(
+            resolve_cred(&Some(file.path().into()), InputType::File),
+            Some("foo".into())
+        );
+    }
+
+    #[test]
+    fn resolve_cred_command() {
+        assert!(resolve_cred(&Some("echo foo".into()), InputType::Command)
+            .unwrap()
+            .starts_with("foo"))
+    }
+}

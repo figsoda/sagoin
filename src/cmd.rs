@@ -30,3 +30,26 @@ pub(crate) fn run_hook(cmd: &Option<OsString>, name: &'static str) -> Result<()>
         _ => Ok(()),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{run_hook, shell};
+
+    #[test]
+    fn shell_echo() {
+        let output = shell().arg("echo foo").output().unwrap();
+        assert!(output.status.success());
+        assert!(output.stdout.starts_with(b"foo"));
+    }
+
+    #[test]
+    fn run_hook_none() {
+        assert!(run_hook(&None, "").is_ok());
+        assert!(run_hook(&Some("".into()), "").is_ok());
+    }
+
+    #[test]
+    fn run_hook_echo() {
+        assert!(run_hook(&Some("echo foo".into()), "").is_ok());
+    }
+}
