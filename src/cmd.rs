@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
 
-use std::process::Command;
+use std::{ffi::OsString, process::Command};
 
 #[cfg(unix)]
 pub(crate) fn shell() -> Command {
@@ -16,7 +16,7 @@ pub(crate) fn shell() -> Command {
     cmd
 }
 
-pub(crate) fn run_hook(cmd: &Option<String>, name: &'static str) -> Result<()> {
+pub(crate) fn run_hook(cmd: &Option<OsString>, name: &'static str) -> Result<()> {
     match cmd {
         Some(cmd) if !cmd.is_empty() => {
             eprintln!("Running {name} hook");

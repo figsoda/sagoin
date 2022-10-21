@@ -1,6 +1,6 @@
 use clap::{Parser, ValueEnum};
 
-use std::path::PathBuf;
+use std::{ffi::OsString, path::PathBuf};
 
 /// A command-line submission tool for the UMD CS Submission Server
 /// https://github.com/figsoda/sagoin
@@ -22,7 +22,7 @@ pub struct Opts {
     /// Specify the username for authentication,
     /// see --username-type for more information
     #[arg(short, long, env = "SAGOIN_USERNAME", value_name = "username")]
-    pub(crate) username: Option<String>,
+    pub(crate) username: Option<OsString>,
 
     /// Specify the type for the username
     ///
@@ -42,7 +42,7 @@ pub struct Opts {
     /// Specify the password for authentication,
     /// see --password-type for more information
     #[arg(short, long, env = "SAGOIN_PASSWORD", value_name = "password")]
-    pub(crate) password: Option<String>,
+    pub(crate) password: Option<OsString>,
 
     /// Specify the type for the password
     ///
@@ -70,7 +70,7 @@ pub struct Opts {
         value_name = "command",
         verbatim_doc_comment
     )]
-    pub(crate) pre_submit_hook: Option<String>,
+    pub(crate) pre_submit_hook: Option<OsString>,
 
     /// Command to run after successful submissions
     ///
@@ -83,7 +83,7 @@ pub struct Opts {
         value_name = "command",
         verbatim_doc_comment
     )]
-    pub(crate) post_submit_hook: Option<String>,
+    pub(crate) post_submit_hook: Option<OsString>,
 }
 
 #[derive(Clone, Copy, ValueEnum)]

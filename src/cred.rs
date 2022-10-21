@@ -2,6 +2,7 @@ use anyhow::{Context, Result};
 use rpassword::read_password;
 
 use std::{
+    ffi::OsString,
     fs::read_to_string,
     io::{self, Write},
     process::{Output, Stdio},
@@ -41,16 +42,20 @@ pub(crate) fn resolve_password(opts: &Opts) -> Result<String> {
     }
 }
 
-fn resolve_cred(cred: &Option<String>, t: InputType) -> Option<String> {
+fn resolve_cred(cred: &Option<OsString>, t: InputType) -> Option<String> {
     let input = cred.as_ref()?;
     if input.is_empty() {
         return None;
     }
 
     match t {
-        InputType::Text => Some(input.clone()),
+        InputType::Text => input
+            .clone()
+            .into_string()
+            .map_err(|_| eprintln!("Warning: invalid UTF-8"))
+            .ok(),
         InputType::File => read_to_string(input)
-            .map_err(|e| eprintln!("Warning: Failed to read {input}:\n{e}"))
+            .map_err(|e| eprintln!("Warning: Failed to read {}:\n{e}", input.to_string_lossy()))
             .ok(),
         InputType::Command => cmd::shell()
             .arg(input)
