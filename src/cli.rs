@@ -1,11 +1,12 @@
 use clap::{Parser, ValueEnum};
+use concolor_clap::{color_choice, Color};
 
 use std::{ffi::OsString, path::PathBuf};
 
 /// A command-line submission tool for the UMD CS Submission Server
 /// https://github.com/figsoda/sagoin
 #[derive(Parser)]
-#[command(version, verbatim_doc_comment)]
+#[command(color = color_choice(), version, verbatim_doc_comment)]
 pub struct Opts {
     /// Set the working directory
     #[arg(value_name = "directory")]
@@ -18,6 +19,10 @@ pub struct Opts {
     /// Open the project page in a web browser
     #[arg(short, long)]
     pub open: bool,
+
+    /// Enable color (does not affect the help message)
+    #[command(flatten)]
+    pub color: Color,
 
     /// Specify the username for authentication,
     /// see --username-type for more information

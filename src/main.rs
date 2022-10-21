@@ -12,10 +12,11 @@ use std::{
     io::{self, Cursor, Seek},
 };
 
-use sagoin::{cli::Opts, get_course_url, submit};
+use sagoin::{cli::Opts, get_course_url, state::State};
 
 fn main() -> Result<()> {
     let opts = Opts::parse();
+    let mut state = State::stderr()?;
 
     if let Some(dir) = &opts.dir {
         set_current_dir(dir).context("Failed to set current dir")?;
@@ -60,7 +61,7 @@ fn main() -> Result<()> {
         zip.rewind()
             .context("Failed to rewind to the beginning of the zip file")?;
 
-        submit(
+        state.submit(
             File::open(".submitUser")
                 .ok()
                 .and_then(|file| java_properties::read(file).ok())
