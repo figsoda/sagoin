@@ -16,6 +16,7 @@ use sagoin::{cli::Opts, get_course_url, state::State};
 
 fn main() -> Result<()> {
     let opts = Opts::parse();
+    opts.color.apply();
     let mut state = State::stderr()?;
 
     if let Some(dir) = &opts.dir {

@@ -8,8 +8,8 @@ use std::{ffi::OsString, path::PathBuf};
 #[derive(Parser)]
 #[command(color = color_choice(), version, verbatim_doc_comment)]
 pub struct Opts {
-    /// Set the working directory
-    #[arg(value_name = "directory")]
+    /// Set the working directory, all commands will be run under this directory
+    #[arg(value_name = "DIRECTORY")]
     pub dir: Option<PathBuf>,
 
     /// Don't submit the project
@@ -20,13 +20,12 @@ pub struct Opts {
     #[arg(short, long)]
     pub open: bool,
 
-    /// Enable color (does not affect the help message)
     #[command(flatten)]
     pub color: Color,
 
     /// Specify the username for authentication,
     /// see --username-type for more information
-    #[arg(short, long, env = "SAGOIN_USERNAME", value_name = "username")]
+    #[arg(short, long, env = "SAGOIN_USERNAME")]
     pub(crate) username: Option<OsString>,
 
     /// Specify the type for the username
@@ -38,7 +37,7 @@ pub struct Opts {
         short = 'U',
         long,
         env = "SAGOIN_USERNAME_TYPE",
-        value_name = "type",
+        value_name = "TYPE",
         default_value = "text",
         verbatim_doc_comment
     )]
@@ -46,7 +45,7 @@ pub struct Opts {
 
     /// Specify the password for authentication,
     /// see --password-type for more information
-    #[arg(short, long, env = "SAGOIN_PASSWORD", value_name = "password")]
+    #[arg(short, long, env = "SAGOIN_PASSWORD")]
     pub(crate) password: Option<OsString>,
 
     /// Specify the type for the password
@@ -58,7 +57,7 @@ pub struct Opts {
         short = 'P',
         long,
         env = "SAGOIN_PASSWORD_TYPE",
-        value_name = "type",
+        value_name = "TYPE",
         default_value = "text",
         verbatim_doc_comment
     )]
@@ -72,7 +71,7 @@ pub struct Opts {
         short = 's',
         long,
         env = "SAGOIN_PRE_SUBMIT_HOOK",
-        value_name = "command",
+        value_name = "COMMAND",
         verbatim_doc_comment
     )]
     pub(crate) pre_submit_hook: Option<OsString>,
@@ -85,7 +84,7 @@ pub struct Opts {
         short = 'S',
         long,
         env = "SAGOIN_POST_SUBMIT_HOOK",
-        value_name = "command",
+        value_name = "COMMAND",
         verbatim_doc_comment
     )]
     pub(crate) post_submit_hook: Option<OsString>,

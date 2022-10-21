@@ -34,7 +34,11 @@ impl State<StderrLock<'static>> {
 
 impl<W: Write> State<W> {
     pub(crate) fn prompt(&mut self, p: impl Display) -> Result<()> {
-        write!(self.out, "\x1b[1;34m{p}\x1b[0m: ")?;
+        if self.color {
+            write!(self.out, "\x1b[1;34m{p}\x1b[0m: ")?;
+        } else {
+            write!(self.out, "{p}: ")?;
+        }
         self.out.flush().context("Failed to flush stderr")?;
         Ok(())
     }

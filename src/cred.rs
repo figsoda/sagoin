@@ -89,11 +89,11 @@ mod tests {
     }
 
     #[test]
-    fn resolve_cred_text() {
-        assert_eq!(
-            State::sink().resolve_cred(&Some("foo".into()), InputType::Text),
-            Some("foo".into())
-        );
+    fn resolve_cred_command() {
+        assert!(State::sink()
+            .resolve_cred(&Some("echo foo".into()), InputType::Command)
+            .unwrap()
+            .starts_with("foo"))
     }
 
     #[test]
@@ -107,10 +107,10 @@ mod tests {
     }
 
     #[test]
-    fn resolve_cred_command() {
-        assert!(State::sink()
-            .resolve_cred(&Some("echo foo".into()), InputType::Command)
-            .unwrap()
-            .starts_with("foo"))
+    fn resolve_cred_text() {
+        assert_eq!(
+            State::sink().resolve_cred(&Some("foo".into()), InputType::Text),
+            Some("foo".into())
+        );
     }
 }
