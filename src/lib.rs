@@ -6,7 +6,7 @@ mod cmd;
 mod cred;
 pub mod state;
 
-use anyhow::{anyhow, Context, Result};
+use eyre::{eyre, Result, WrapErr};
 use icalendar::parser::{read_calendar_simple, unfold};
 use multipart::client::lazy::Multipart;
 
@@ -22,7 +22,8 @@ trait PropsExt {
 
 impl PropsExt for Props {
     fn get_prop(&self, key: &'static str) -> Result<&String> {
-        self.get(key).context(format!("{key} is null in .submit"))
+        self.get(key)
+            .ok_or_else(|| eyre!("{key} is null in .submit"))
     }
 }
 
@@ -73,7 +74,7 @@ impl<W: Write> State<W> {
                 Some(
                     "application/zip"
                         .parse()
-                        .context("Failed to parse application/zip as a mime type")?,
+                        .wrap_err("failed to parse application/zip as a mime type")?,
                 ),
             )
             .prepare()?;
@@ -105,14 +106,14 @@ impl<W: Write> State<W> {
             }
 
             Err(ureq::Error::Status(code, resp)) => Err(if let Ok(err) = resp.into_string() {
-                anyhow!("{}", err.trim_end())
-                    .context(format!("Status code {code}"))
-                    .context("Failed to submit project")
+                eyre!("{}", err.trim_end())
+                    .wrap_err(format!("status code {code}"))
+                    .wrap_err("failed to submit project")
             } else {
-                anyhow!("Status code {code}").context("Failed to submit project")
+                eyre!("status code {code}").wrap_err("failed to submit project")
             }),
 
-            Err(e) => Err(e).context("Failed to send request to the submit server"),
+            Err(e) => Err(e).wrap_err("failed to send request to the submit server"),
         }
     }
 }
@@ -131,11 +132,11 @@ pub fn get_course_url(props: &Props) -> Result<String> {
             props.get_prop("courseKey")?,
         ))
         .call()
-        .context("Failed to download the course calendar")?
+        .wrap_err("failed to download the course calendar")?
         .into_string()
-        .context("Failed to parse the course calendar")?,
+        .wrap_err("failed to parse the course calendar")?,
     ))
-    .map_err(|e| anyhow!("{e}").context("Failed to parse the course calendar"))?
+    .map_err(|e| eyre!("{e}").wrap_err("failed to parse the course calendar"))?
     .get(0)
     .and_then(|root| {
         root.components.iter().find_map(|component| {
@@ -165,5 +166,5 @@ pub fn get_course_url(props: &Props) -> Result<String> {
             }
         })
     })
-    .context("Failed to find the course url")
+    .ok_or_else(|| eyre!("failed to find the course url"))
 }

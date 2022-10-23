@@ -1,7 +1,7 @@
 #![forbid(unsafe_code)]
 
-use anyhow::{Context, Result};
 use clap::Parser;
+use eyre::{Result, WrapErr};
 use ignore::WalkBuilder;
 use is_executable::IsExecutable;
 use zip::{write::FileOptions, ZipWriter};
@@ -9,7 +9,7 @@ use zip::{write::FileOptions, ZipWriter};
 use std::{
     env::set_current_dir,
     fs::File,
-    io::{self, Cursor, Seek},
+    io::{self, Cursor},
 };
 
 use sagoin::{cli::Opts, get_course_url, state::State};
@@ -20,20 +20,20 @@ fn main() -> Result<()> {
     let mut state = State::stderr()?;
 
     if let Some(dir) = &opts.dir {
-        set_current_dir(dir).context("Failed to set current dir")?;
+        set_current_dir(dir).wrap_err("failed to set current dir")?;
     }
 
-    let props = java_properties::read(File::open(".submit").context("Failed to read .submit")?)
-        .context("Failed to parse .submit")?;
+    let props = java_properties::read(File::open(".submit").wrap_err("failed to read .submit")?)
+        .wrap_err("failed to parse .submit")?;
 
     if !opts.no_submit {
         let mut zip = ZipWriter::new(Cursor::new(Vec::new()));
         zip.set_comment("");
         let regular = FileOptions::default();
         let executable = regular.unix_permissions(0o755);
+
         for entry in WalkBuilder::new(".").hidden(false).build() {
-            let entry = entry.context("Failed to read entry")?;
-            let path = entry.into_path();
+            let path = entry.wrap_err("failed to read entry")?.into_path();
             let path = path.strip_prefix(".")?;
             if !path.is_file() || matches!(path.file_name(), Some(name) if name == ".submitUser") {
                 continue;
@@ -47,20 +47,15 @@ fn main() -> Result<()> {
                     regular
                 },
             )
-            .context("Failed to write to the zip file")?;
+            .wrap_err("failed to write to the zip file")?;
 
             io::copy(
-                &mut File::open(path).context(format!("Failed to read {}", path.display()))?,
+                &mut File::open(path)
+                    .wrap_err_with(|| format!("failed to read {}", path.display()))?,
                 &mut zip,
             )
-            .context("Failed to write to the zip file")?;
+            .wrap_err("failed to write to the zip file")?;
         }
-
-        let mut zip = zip
-            .finish()
-            .context("Failed to finish writing to the zip file")?;
-        zip.rewind()
-            .context("Failed to rewind to the beginning of the zip file")?;
 
         state.submit(
             File::open(".submitUser")
@@ -69,12 +64,14 @@ fn main() -> Result<()> {
                 .unwrap_or_default(),
             &props,
             &opts,
-            &zip.into_inner(),
+            &zip.finish()
+                .wrap_err("failed to finish writing to the zip file")?
+                .into_inner(),
         )?;
     }
 
     if opts.open {
-        webbrowser::open(&get_course_url(&props)?).context("Failed to open the web browser")?;
+        webbrowser::open(&get_course_url(&props)?).wrap_err("failed to open the web browser")?;
     }
 
     Ok(())

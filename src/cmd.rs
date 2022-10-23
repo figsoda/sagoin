@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use eyre::{eyre, Result};
 
 use std::{ffi::OsString, io::Write, process::Command};
 
@@ -25,7 +25,7 @@ impl<W: Write> State<W> {
                 writeln!(self.out, "Running {name} hook")?;
                 let status = shell().arg(cmd).status()?;
                 if !status.success() {
-                    Err(anyhow!("{name} hook failed with exit code {status}"))
+                    Err(eyre!("{name} hook failed with exit code {status}"))
                 } else {
                     Ok(())
                 }

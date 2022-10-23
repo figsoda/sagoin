@@ -12,9 +12,9 @@ keywords = ["cli", "command-line", "marmoset", "submit", "umd"]
 categories = ["command-line-utilities"]
 
 [dependencies]
-anyhow = "1.0.65"
 concolor = "0.0.9"
 concolor-clap = { version = "0.0.12", features = ["api_unstable"] }
+eyre = "0.6.8"
 icalendar = { version = "0.13.1", features = ["parser"] }
 ignore = "0.4.18"
 is_executable = "1.0.1"
@@ -27,6 +27,11 @@ zip = { version = "0.6.2", default-features = false }
 [dependencies.clap]
 version = "4.0.8"
 features = ["cargo", "derive", "env", "unicode", "wrap_help"]
+
+[dependencies.color-eyre]
+version = "0.6.2"
+default-features = false
+features = ["track-caller"]
 
 [dependencies.multipart]
 version = "0.18.0"

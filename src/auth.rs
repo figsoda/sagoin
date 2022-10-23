@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Context, Result};
+use eyre::{eyre, Result, WrapErr};
 
 use std::{fs, io::Write};
 
@@ -28,13 +28,14 @@ impl<W: Write> State<W> {
                         .read_to_end(&mut submit_user)
                         .map_err(Into::into)
                 })
-                .context("Failed to negotiate one-time password with the server")?;
+                .wrap_err("failed to negotiate one-time password with the server")?;
 
-                fs::write(".submitUser", &submit_user).context("Failed to write to .submitUser")?;
+                fs::write(".submitUser", &submit_user)
+                    .wrap_err("failed to write to .submitUser")?;
                 Ok(java_properties::read(&*submit_user)?)
             }
 
-            auth => Err(anyhow!("Unsupported authentication type: {auth}")),
+            auth => Err(eyre!("unsupported authentication type: {auth}")),
         }
     }
 }

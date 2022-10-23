@@ -1,4 +1,4 @@
-use anyhow::{Context, Result};
+use eyre::{Result, WrapErr};
 use rpassword::read_password;
 
 use std::{
@@ -21,7 +21,7 @@ impl<W: Write> State<W> {
                 let mut user = String::new();
                 io::stdin()
                     .read_line(&mut user)
-                    .context("Failed to prompt for username")?;
+                    .wrap_err("failed to prompt for username")?;
 
                 user
             },
@@ -33,7 +33,7 @@ impl<W: Write> State<W> {
             Ok(pass)
         } else {
             self.prompt("Password")?;
-            read_password().context("Failed to prompt for password")
+            read_password().wrap_err("failed to prompt for password")
         }
     }
 

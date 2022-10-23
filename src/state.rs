@@ -3,7 +3,8 @@ use std::{
     io::{self, StderrLock, Write},
 };
 
-use anyhow::{Context, Result};
+use color_eyre::config::{HookBuilder, Theme};
+use eyre::{Result, WrapErr};
 
 pub struct State<W: Write> {
     pub(crate) color: bool,
@@ -25,8 +26,16 @@ macro_rules! warn {
 
 impl State<StderrLock<'static>> {
     pub fn stderr() -> Result<Self> {
+        let color = concolor::get(concolor::Stream::Stderr).ansi_color();
+
+        if color {
+            color_eyre::install()?;
+        } else {
+            HookBuilder::new().theme(Theme::new()).install()?;
+        }
+
         Ok(Self {
-            color: concolor::get(concolor::Stream::Stderr).ansi_color(),
+            color,
             out: io::stderr().lock(),
         })
     }
@@ -39,14 +48,16 @@ impl<W: Write> State<W> {
         } else {
             write!(self.out, "{p}: ")?;
         }
-        self.out.flush().context("Failed to flush stderr")?;
+
+        self.out.flush().wrap_err("failed to flush stderr")?;
+
         Ok(())
     }
 }
 
 #[cfg(test)]
 impl State<io::Sink> {
-    pub(crate) fn sink() -> State<io::Sink> {
+    pub(crate) fn sink() -> Self {
         Self {
             color: false,
             out: io::sink(),
@@ -56,7 +67,7 @@ impl State<io::Sink> {
 
 #[cfg(test)]
 impl State<Vec<u8>> {
-    pub(crate) fn buffer() -> State<Vec<u8>> {
+    pub(crate) fn buffer() -> Self {
         Self {
             color: false,
             out: Vec::new(),
