@@ -48,7 +48,7 @@ pub fn load_config() -> Result<(Config, State<StderrLock<'static>>)> {
     let mut state = State::stderr()?;
 
     Ok((
-        if let Some(path) = find_config_file() {
+        if let Some(path) = opts.config.or_else(find_config_file) {
             let cfg: ConfigFile = toml::from_slice(
                 &fs::read(&path).wrap_err_with(|| format!("failed to read {}", path.display()))?,
             )?;
@@ -147,7 +147,7 @@ fn find_config_file() -> Option<PathBuf> {
         .and_then(|dirs| dirs.find_config_file("config.toml"))
 }
 
-#[cfg(not(unix))]
+#[cfg(windows)]
 fn find_config_file() -> Option<PathBuf> {
     dirs::config_dir().map(|dir| dir.join("sagoin").join("config.toml"))
 }

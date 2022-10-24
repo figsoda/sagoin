@@ -43,7 +43,7 @@ features = ["client"]
 [target."cfg(unix)".dependencies]
 xdg = "2.4.1"
 
-[target."cfg(not(unix))".dependencies]
+[target."cfg(windows)".dependencies]
 dirs = "4.0.0"
 
 [build-dependencies]

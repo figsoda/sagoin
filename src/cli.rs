@@ -23,6 +23,19 @@ pub(crate) struct Opts {
     #[command(flatten)]
     pub color: Color,
 
+    /// Specify the username,
+    #[cfg_attr(
+        unix,
+        doc = "looks for sagoin/config.toml under XDG configuration directories"
+    )]
+    #[cfg_attr(
+        windows,
+        doc = "defaults to {FOLDERID_RoamingAppData}\\sagoin\\config.toml"
+    )]
+    /// when unspecified
+    #[arg(short, long, env = "SAGOIN_CONFIG", value_name = "FILE")]
+    pub config: Option<PathBuf>,
+
     /// Specify the username for authentication,
     /// see --username-type for more information
     #[arg(short, long, env = "SAGOIN_USERNAME")]
