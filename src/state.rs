@@ -25,7 +25,7 @@ macro_rules! warn {
 }
 
 impl State<StderrLock<'static>> {
-    pub fn stderr() -> Result<Self> {
+    pub(crate) fn stderr() -> Result<Self> {
         let color = concolor::get(concolor::Stream::Stderr).ansi_color();
 
         if color {

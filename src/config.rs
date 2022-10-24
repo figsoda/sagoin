@@ -32,7 +32,7 @@ pub(crate) enum Credential {
 }
 
 #[derive(Deserialize)]
-pub struct ConfigFile {
+struct ConfigFile {
     username: Option<String>,
     username_type: Option<InputType>,
     password: Option<String>,
@@ -58,27 +58,19 @@ pub fn load_config() -> Result<(Config, State<StderrLock<'static>>)> {
                 no_submit: opts.no_submit,
                 open: opts.open,
                 username: Credential::from_fallback(
+                    &mut state,
+                    "username",
                     opts.username,
                     cfg.username,
                     opts.username_type.or(cfg.username_type),
-                )
-                .and_then(|user| {
-                    if user.is_none() {
-                        warn!(state, "username contains ivalid UTF-8");
-                    }
-                    user
-                }),
+                ),
                 password: Credential::from_fallback(
+                    &mut state,
+                    "password",
                     opts.password,
                     cfg.password,
                     opts.password_type.or(cfg.password_type),
-                )
-                .and_then(|pass| {
-                    if pass.is_none() {
-                        warn!(state, "password contains ivalid UTF-8");
-                    }
-                    pass
-                }),
+                ),
                 pre_submit_hook: opts.pre_submit_hook.or(cfg.pre_submit_hook),
                 post_submit_hook: opts.post_submit_hook.or(cfg.post_submit_hook),
             }
@@ -88,24 +80,10 @@ pub fn load_config() -> Result<(Config, State<StderrLock<'static>>)> {
                 no_submit: opts.no_submit,
                 open: opts.open,
                 username: opts.username.and_then(|user| {
-                    if user.is_empty() {
-                        None
-                    } else {
-                        Credential::from_os_string(user, opts.username_type).or_else(|| {
-                            warn!(state, "username contains invalid UTF8");
-                            None
-                        })
-                    }
+                    Credential::from_os_string(&mut state, "username", user, opts.username_type)
                 }),
                 password: opts.password.and_then(|pass| {
-                    if pass.is_empty() {
-                        None
-                    } else {
-                        Credential::from_os_string(pass, opts.password_type).or_else(|| {
-                            warn!(state, "password contains invalid UTF8");
-                            None
-                        })
-                    }
+                    Credential::from_os_string(&mut state, "password", pass, opts.password_type)
                 }),
                 pre_submit_hook: opts.pre_submit_hook,
                 post_submit_hook: opts.post_submit_hook,
@@ -117,33 +95,48 @@ pub fn load_config() -> Result<(Config, State<StderrLock<'static>>)> {
 
 impl Credential {
     fn from_fallback(
+        state: &mut State<impl Write>,
+        name: &'static str,
         x: Option<OsString>,
         y: Option<String>,
         t: Option<InputType>,
-    ) -> Option<Option<Self>> {
+    ) -> Option<Self> {
         if let Some(input) = x {
-            (!input.is_empty()).then(|| Self::from_os_string(input, t))
+            Self::from_os_string(state, name, input, t)
         } else if let Some(input) = y {
-            (!input.is_empty()).then(|| Some(Self::from_string(input, t)))
+            Self::from_string(input, t)
         } else {
             None
         }
     }
 
-    fn from_os_string(input: OsString, t: Option<InputType>) -> Option<Self> {
-        match t.unwrap_or(InputType::Text) {
-            InputType::Command => Some(Self::Command(input)),
-            InputType::File => Some(Self::File(input)),
-            InputType::Text => input.into_string().ok().map(Self::Text),
+    fn from_os_string(
+        state: &mut State<impl Write>,
+        name: &'static str,
+        input: OsString,
+        t: Option<InputType>,
+    ) -> Option<Self> {
+        if input.is_empty() {
+            None
+        } else {
+            match t.unwrap_or(InputType::Text) {
+                InputType::Command => Some(Self::Command(input)),
+                InputType::File => Some(Self::File(input)),
+                InputType::Text => input
+                    .into_string()
+                    .map_err(|_| warn!(state, "{name} contains invalid UTF-8"))
+                    .ok()
+                    .map(Self::Text),
+            }
         }
     }
 
-    fn from_string(input: String, t: Option<InputType>) -> Self {
-        match t.unwrap_or(InputType::Text) {
+    fn from_string(input: String, t: Option<InputType>) -> Option<Self> {
+        (!input.is_empty()).then(|| match t.unwrap_or(InputType::Text) {
             InputType::Command => Self::Command(input.into()),
             InputType::File => Self::File(input.into()),
             InputType::Text => Self::Text(input),
-        }
+        })
     }
 }
 
@@ -155,6 +148,6 @@ fn find_config_file() -> Option<PathBuf> {
 }
 
 #[cfg(not(unix))]
-fn find_config() -> Option<PathBuf> {
+fn find_config_file() -> Option<PathBuf> {
     dirs::config_dir().map(|dir| dir.join("sagoin").join("config.toml"))
 }
