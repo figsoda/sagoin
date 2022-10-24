@@ -23,7 +23,7 @@ pub(crate) struct Opts {
     #[command(flatten)]
     pub color: Color,
 
-    /// Specify the username,
+    /// Specify the path to the config file,
     #[cfg_attr(
         unix,
         doc = "looks for sagoin/config.toml under XDG configuration directories"

@@ -29,6 +29,23 @@ cargo install sagoin
 cargo build --release
 ```
 
+## Quick start
+
+Submit the project in the current directory:
+```sh
+sagoin
+```
+
+Submit the project under the `ProjectName` directory:
+```sh
+sagoin ProjectName
+```
+
+Submit the project under the `ProjectName` directory and open the project page in a web browser:
+```sh
+sagoin ProjectName -o
+```
+
 
 ## Usage
 
@@ -42,15 +59,17 @@ Options:
   -n, --no-submit                   Don't submit the project
   -o, --open                        Open the project page in a web browser
       --color <WHEN>                Controls when to use color [default: auto] [possible values: auto, always, never]
+  -c, --config <FILE>               Specify the path to the config file, looks for sagoin/config.toml under XDG configuration directories on unix-like systems, and defaults to {FOLDERID_RoamingAppData}\sagoin\config.toml on windows when unspecified [env: SAGOIN_CONFIG=]
   -u, --username <USERNAME>         Specify the username for authentication, see --username-type for more information [env: SAGOIN_USERNAME=]
-  -U, --username-type <TYPE>        Specify the type for the username [env: SAGOIN_USERNAME_TYPE=] [default: text] [possible values: command, file, text]
+  -U, --username-type <TYPE>        Specify the type for the username, defaults to text when unspecified [env: SAGOIN_USERNAME_TYPE=] [possible values: command, file, text]
   -p, --password <PASSWORD>         Specify the password for authentication, see --password-type for more information [env: SAGOIN_PASSWORD=]
-  -P, --password-type <TYPE>        Specify the type for the password [env: SAGOIN_PASSWORD_TYPE=] [default: text] [possible values: command, file, text]
+  -P, --password-type <TYPE>        Specify the type for the password, defaults to text when unspecified [env: SAGOIN_PASSWORD_TYPE=] [possible values: command, file, text]
   -s, --pre-submit-hook <COMMAND>   Command to run before submission [env: SAGOIN_PRE_SUBMIT_HOOK=]
   -S, --post-submit-hook <COMMAND>  Command to run after successful submissions [env: SAGOIN_POST_SUBMIT_HOOK=]
   -h, --help                        Print help information (use `-h` for a summary, use `--help` for more detail)
   -V, --version                     Print version information
 ```
+
 
 ## Feature comparison
 
@@ -65,6 +84,25 @@ CVS ignore | ✗ | ✓ | ✓
 Git ignore | ✓ | ✗ | ✗
 Custom credential input | ✓ | ✗ | ✗
 Open project page | ✓ | ✗ | ✗
+
+
+## Configuration
+
+File resolution:
+- for unix-like systems: looks for `sagoin/config.toml` under XDG configuration directories, e.g. `/home/<user>/.config/sagoin/config.toml`
+- for windows: defaults to `{FOLDERID_RoamingAppData}\sagoin\config.toml`, e.g. `C:\Users\<user>\AppData\Roaming\sagoin\config.toml`
+
+The configuration file is written in [TOML](https://toml.io). Run `sagoin --help` for more information.
+
+```toml
+# config.toml
+username = "..."
+username_type = "command | file | text"
+password = "..."
+password_type = "command | file | text"
+pre_submit_hook = "..."
+post_submit_hook = "..."
+```
 
 
 ## Changelog
