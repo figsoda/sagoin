@@ -151,3 +151,85 @@ fn find_config_file() -> Option<PathBuf> {
 fn find_config_file() -> Option<PathBuf> {
     dirs::config_dir().map(|dir| dir.join("sagoin").join("config.toml"))
 }
+
+#[cfg(test)]
+mod tests {
+    use std::ffi::OsString;
+
+    use crate::{cli::InputType, state::State};
+
+    use super::Credential;
+
+    #[test]
+    fn credential_from_fallback_none() {
+        let mut state = State::buffer();
+        assert!(Credential::from_fallback(&mut state, "password", None, None, None).is_none());
+        assert!(state.out.is_empty());
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn credential_from_fallback_invalid() {
+        use std::os::unix::ffi::OsStringExt;
+
+        let mut state = State::buffer();
+        assert!(Credential::from_fallback(
+            &mut state,
+            "password",
+            Some(OsString::from_vec(vec![0xff])),
+            None,
+            None
+        )
+        .is_none());
+        assert!(!state.out.is_empty());
+    }
+
+    #[test]
+    #[cfg(windows)]
+    fn credential_from_fallback_invalid() {
+        use std::os::windows::ffi::OsStringExt;
+
+        let mut state = State::buffer();
+        assert!(Credential::from_fallback(
+            &mut state,
+            "password",
+            Some(OsString::from_wide(&[0xdfff])),
+            None,
+            None
+        )
+        .is_none());
+        assert!(!state.out.is_empty());
+    }
+
+    #[test]
+    fn credential_from_fallback_config_file() {
+        let mut state = State::buffer();
+        assert!(matches!(
+            Credential::from_fallback(
+                &mut state,
+                "password",
+                None,
+                Some("foo".into()),
+                Some(InputType::File),
+            ),
+            Some(Credential::File(input)) if input == "foo"
+        ));
+        assert!(state.out.is_empty());
+    }
+
+    #[test]
+    fn credential_from_fallback_both() {
+        let mut state = State::buffer();
+        assert!(matches!(
+            Credential::from_fallback(
+                &mut state,
+                "password",
+                Some("foo".into()),
+                Some("bar".into()),
+                None,
+            ),
+            Some(Credential::Text(input)) if input == "foo"
+        ));
+        assert!(state.out.is_empty());
+    }
+}
