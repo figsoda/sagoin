@@ -1,6 +1,5 @@
 #![forbid(unsafe_code)]
 
-use clap::Parser;
 use eyre::{Result, WrapErr};
 use ignore::WalkBuilder;
 use is_executable::IsExecutable;
@@ -12,21 +11,19 @@ use std::{
     io::{self, Cursor},
 };
 
-use sagoin::{cli::Opts, get_course_url, state::State};
+use sagoin::{config::load_config, get_course_url};
 
 fn main() -> Result<()> {
-    let opts = Opts::parse();
-    opts.color.apply();
-    let mut state = State::stderr()?;
+    let (cfg, mut state) = load_config()?;
 
-    if let Some(dir) = &opts.dir {
+    if let Some(dir) = &cfg.dir {
         set_current_dir(dir).wrap_err("failed to set current dir")?;
     }
 
     let props = java_properties::read(File::open(".submit").wrap_err("failed to read .submit")?)
         .wrap_err("failed to parse .submit")?;
 
-    if !opts.no_submit {
+    if !cfg.no_submit {
         let mut zip = ZipWriter::new(Cursor::new(Vec::new()));
         zip.set_comment("");
         let regular = FileOptions::default();
@@ -63,14 +60,14 @@ fn main() -> Result<()> {
                 .and_then(|file| java_properties::read(file).ok())
                 .unwrap_or_default(),
             &props,
-            &opts,
+            &cfg,
             &zip.finish()
                 .wrap_err("failed to finish writing to the zip file")?
                 .into_inner(),
         )?;
     }
 
-    if opts.open {
+    if cfg.open {
         webbrowser::open(&get_course_url(&props)?).wrap_err("failed to open the web browser")?;
     }
 

@@ -12,6 +12,7 @@ include!("src/cli.rs");
 
 fn main() {
     println!("cargo:rerun-if-env-changed=GEN_ARTIFACTS");
+    println!("cargo:rustc-cfg=not_build");
 
     if let Some(dir) = env::var_os("GEN_ARTIFACTS") {
         let out = &Path::new(&dir);

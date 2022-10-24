@@ -7,7 +7,7 @@ use std::{ffi::OsString, path::PathBuf};
 /// https://github.com/figsoda/sagoin
 #[derive(Parser)]
 #[command(color = color_choice(), version, verbatim_doc_comment)]
-pub struct Opts {
+pub(crate) struct Opts {
     /// Set the working directory, all commands will be run under this directory
     #[arg(value_name = "DIRECTORY")]
     pub dir: Option<PathBuf>,
@@ -26,9 +26,9 @@ pub struct Opts {
     /// Specify the username for authentication,
     /// see --username-type for more information
     #[arg(short, long, env = "SAGOIN_USERNAME")]
-    pub(crate) username: Option<OsString>,
+    pub username: Option<OsString>,
 
-    /// Specify the type for the username
+    /// Specify the type for the username, defaults to text when unspecified
     ///
     /// text: the specified username will be used as is
     /// file: the username will be read from the specified file
@@ -38,17 +38,16 @@ pub struct Opts {
         long,
         env = "SAGOIN_USERNAME_TYPE",
         value_name = "TYPE",
-        default_value = "text",
         verbatim_doc_comment
     )]
-    pub(crate) username_type: InputType,
+    pub username_type: Option<InputType>,
 
     /// Specify the password for authentication,
     /// see --password-type for more information
     #[arg(short, long, env = "SAGOIN_PASSWORD")]
-    pub(crate) password: Option<OsString>,
+    pub password: Option<OsString>,
 
-    /// Specify the type for the password
+    /// Specify the type for the password, defaults to text when unspecified
     ///
     /// text: the specified password will be used as is
     /// file: the password will be read from the specified file
@@ -58,10 +57,9 @@ pub struct Opts {
         long,
         env = "SAGOIN_PASSWORD_TYPE",
         value_name = "TYPE",
-        default_value = "text",
         verbatim_doc_comment
     )]
-    pub(crate) password_type: InputType,
+    pub password_type: Option<InputType>,
 
     /// Command to run before submission
     ///
@@ -74,7 +72,7 @@ pub struct Opts {
         value_name = "COMMAND",
         verbatim_doc_comment
     )]
-    pub(crate) pre_submit_hook: Option<OsString>,
+    pub pre_submit_hook: Option<OsString>,
 
     /// Command to run after successful submissions
     ///
@@ -87,10 +85,15 @@ pub struct Opts {
         value_name = "COMMAND",
         verbatim_doc_comment
     )]
-    pub(crate) post_submit_hook: Option<OsString>,
+    pub post_submit_hook: Option<OsString>,
 }
 
 #[derive(Clone, Copy, ValueEnum)]
+#[cfg_attr(
+    not_build,
+    derive(serde::Deserialize),
+    serde(rename_all = "kebab-case")
+)]
 pub(crate) enum InputType {
     Command,
     File,

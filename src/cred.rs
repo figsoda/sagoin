@@ -2,34 +2,31 @@ use eyre::{Result, WrapErr};
 use rpassword::read_password;
 
 use std::{
-    ffi::OsString,
     fs::read_to_string,
     io::{self, Write},
     process::{Output, Stdio},
 };
 
-use crate::{cli::InputType, cmd, state::State, warn, Opts};
+use crate::{cmd, config::Credential, state::State, warn};
 
 impl<W: Write> State<W> {
-    pub(crate) fn resolve_username(&mut self, opts: &Opts) -> Result<String> {
-        Ok(
-            if let Some(user) = self.resolve_cred(&opts.username, opts.username_type) {
-                user
-            } else {
-                self.prompt("Username")?;
+    pub(crate) fn resolve_username(&mut self, user: &Option<Credential>) -> Result<String> {
+        Ok(if let Some(user) = self.resolve_cred(user) {
+            user
+        } else {
+            self.prompt("Username")?;
 
-                let mut user = String::new();
-                io::stdin()
-                    .read_line(&mut user)
-                    .wrap_err("failed to prompt for username")?;
+            let mut user = String::new();
+            io::stdin()
+                .read_line(&mut user)
+                .wrap_err("failed to prompt for username")?;
 
-                user
-            },
-        )
+            user
+        })
     }
 
-    pub(crate) fn resolve_password(&mut self, opts: &Opts) -> Result<String> {
-        if let Some(pass) = self.resolve_cred(&opts.password, opts.password_type) {
+    pub(crate) fn resolve_password(&mut self, pass: &Option<Credential>) -> Result<String> {
+        if let Some(pass) = self.resolve_cred(pass) {
             Ok(pass)
         } else {
             self.prompt("Password")?;
@@ -37,22 +34,13 @@ impl<W: Write> State<W> {
         }
     }
 
-    fn resolve_cred(&mut self, cred: &Option<OsString>, t: InputType) -> Option<String> {
-        let input = cred.as_ref()?;
-        if input.is_empty() {
-            return None;
-        }
-
-        match t {
-            InputType::Text => input
-                .clone()
-                .into_string()
-                .map_err(|_| warn!(self, "invalid UTF-8"))
-                .ok(),
-            InputType::File => read_to_string(input)
+    fn resolve_cred(&mut self, cred: &Option<Credential>) -> Option<String> {
+        match cred.as_ref()? {
+            Credential::Text(input) => Some(input.clone()),
+            Credential::File(input) => read_to_string(input)
                 .map_err(|e| warn!(self, "failed to read {}:\n{e}", input.to_string_lossy()))
                 .ok(),
-            InputType::Command => cmd::shell()
+            Credential::Command(input) => cmd::shell()
                 .arg(input)
                 .stderr(Stdio::inherit())
                 .stdin(Stdio::inherit())
@@ -79,19 +67,18 @@ mod tests {
 
     use std::io::Write;
 
-    use crate::{cli::InputType, state::State};
+    use crate::{config::Credential, state::State};
 
     #[test]
     fn resolve_cred_none() {
         let mut state = State::sink();
-        assert_eq!(state.resolve_cred(&None, InputType::Text), None);
-        assert_eq!(state.resolve_cred(&Some("".into()), InputType::Text), None);
+        assert_eq!(state.resolve_cred(&None), None);
     }
 
     #[test]
     fn resolve_cred_command() {
         assert!(State::sink()
-            .resolve_cred(&Some("echo foo".into()), InputType::Command)
+            .resolve_cred(&Some(Credential::Command("echo foo".into())))
             .unwrap()
             .starts_with("foo"));
     }
@@ -101,7 +88,7 @@ mod tests {
         let mut file = NamedTempFile::new().unwrap();
         write!(file, "foo").unwrap();
         assert_eq!(
-            State::sink().resolve_cred(&Some(file.path().into()), InputType::File),
+            State::sink().resolve_cred(&Some(Credential::File(file.path().into()))),
             Some("foo".into()),
         );
     }
@@ -109,7 +96,7 @@ mod tests {
     #[test]
     fn resolve_cred_text() {
         assert_eq!(
-            State::sink().resolve_cred(&Some("foo".into()), InputType::Text),
+            State::sink().resolve_cred(&Some(Credential::Text("foo".into()))),
             Some("foo".into()),
         );
     }

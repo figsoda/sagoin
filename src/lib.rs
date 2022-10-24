@@ -1,8 +1,9 @@
 #![forbid(unsafe_code)]
 
 mod auth;
-pub mod cli;
+mod cli;
 mod cmd;
+pub mod config;
 mod cred;
 pub mod state;
 
@@ -12,7 +13,7 @@ use multipart::client::lazy::Multipart;
 
 use std::{collections::HashMap, io::Write};
 
-use crate::{cli::Opts, state::State};
+use crate::{config::Config, state::State};
 
 type Props = HashMap<String, String>;
 
@@ -32,12 +33,12 @@ impl<W: Write> State<W> {
         &mut self,
         user_props: Props,
         props: &Props,
-        opts: &Opts,
+        cfg: &Config,
         zip: &[u8],
     ) -> Result<()> {
-        self.run_hook(&opts.pre_submit_hook, "pre-submit")?;
-        self.submit_project(user_props, props, opts, zip, true)?;
-        self.run_hook(&opts.post_submit_hook, "post-submit")?;
+        self.run_hook(&cfg.pre_submit_hook, "pre-submit")?;
+        self.submit_project(user_props, props, cfg, zip, true)?;
+        self.run_hook(&cfg.post_submit_hook, "post-submit")?;
 
         Ok(())
     }
@@ -46,7 +47,7 @@ impl<W: Write> State<W> {
         &mut self,
         user_props: Props,
         props: &Props,
-        opts: &Opts,
+        opts: &Config,
         zip: &[u8],
         reauth: bool,
     ) -> Result<()> {
