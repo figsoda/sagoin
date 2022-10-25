@@ -97,7 +97,8 @@ File resolution:
 The configuration file is written in [TOML](https://toml.io). Run `sagoin --help` for more information.
 
 ```toml
-# config.toml
+# all possible fields in config.toml
+time_format = "..."
 username = "..."
 username_type = "command | file | text"
 password = "..."

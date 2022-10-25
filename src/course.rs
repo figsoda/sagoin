@@ -31,7 +31,7 @@ pub fn print_course_info(props: &Props, fmt: String) -> Result<()> {
             &mut out,
             &format_description::parse(&fmt).wrap_err("failed to parse time format")?,
         )
-        .context("failed to format time")?;
+        .wrap_err("failed to format time")?;
 
         writeln!(out)?;
     }
