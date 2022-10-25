@@ -11,7 +11,7 @@ use std::{
     io::{self, Cursor},
 };
 
-use sagoin::{config::load_config, get_course_url};
+use sagoin::{config::load_config, course::get_course_url};
 
 fn main() -> Result<()> {
     let (cfg, mut state) = load_config()?;
