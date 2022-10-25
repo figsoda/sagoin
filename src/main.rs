@@ -11,7 +11,10 @@ use std::{
     io::{self, Cursor},
 };
 
-use sagoin::{config::load_config, course::get_course_url};
+use sagoin::{
+    config::load_config,
+    course::{get_course_url, print_course_info},
+};
 
 fn main() -> Result<()> {
     let (cfg, mut state) = load_config()?;
@@ -22,6 +25,10 @@ fn main() -> Result<()> {
 
     let props = java_properties::read(File::open(".submit").wrap_err("failed to read .submit")?)
         .wrap_err("failed to parse .submit")?;
+
+    if cfg.info {
+        return print_course_info(&props, cfg.time_format);
+    }
 
     if !cfg.no_submit {
         let mut zip = ZipWriter::new(Cursor::new(Vec::new()));

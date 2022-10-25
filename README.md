@@ -57,9 +57,11 @@ Arguments:
 
 Options:
   -n, --no-submit                   Don't submit the project
+  -i, --info                        Show information about the project and exit
   -o, --open                        Open the project page in a web browser
       --color <WHEN>                Controls when to use color [default: auto] [possible values: auto, always, never]
   -c, --config <FILE>               Specify the path to the config file, looks for sagoin/config.toml under XDG configuration directories on unix-like systems, and defaults to {FOLDERID_RoamingAppData}\sagoin\config.toml on windows when unspecified [env: SAGOIN_CONFIG=]
+  -t, --time-format <FORMAT>        Specify how to format the due date, ignored without the --info flag, defaults to "[month repr:short] [day padding:none], [hour]:[minute]" when unspecified [env: SAGOIN_TIME_FORMAT=]
   -u, --username <USERNAME>         Specify the username for authentication, see --username-type for more information [env: SAGOIN_USERNAME=]
   -U, --username-type <TYPE>        Specify the type for the username, defaults to text when unspecified [env: SAGOIN_USERNAME_TYPE=] [possible values: command, file, text]
   -p, --password <PASSWORD>         Specify the password for authentication, see --password-type for more information [env: SAGOIN_PASSWORD=]

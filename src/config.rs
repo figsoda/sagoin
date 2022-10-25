@@ -18,7 +18,9 @@ use crate::{
 pub struct Config {
     pub dir: Option<PathBuf>,
     pub no_submit: bool,
+    pub info: bool,
     pub open: bool,
+    pub time_format: String,
     pub(crate) username: Option<Credential>,
     pub(crate) password: Option<Credential>,
     pub(crate) pre_submit_hook: Option<OsString>,
@@ -33,6 +35,7 @@ pub(crate) enum Credential {
 
 #[derive(Deserialize)]
 struct ConfigFile {
+    time_format: Option<String>,
     username: Option<String>,
     username_type: Option<InputType>,
     password: Option<String>,
@@ -56,7 +59,12 @@ pub fn load_config() -> Result<(Config, State<StderrLock<'static>>)> {
             Config {
                 dir: opts.dir,
                 no_submit: opts.no_submit,
+                info: opts.info,
                 open: opts.open,
+                time_format: opts
+                    .time_format
+                    .or(cfg.time_format)
+                    .unwrap_or_else(default_time_format),
                 username: Credential::from_fallback(
                     &mut state,
                     "username",
@@ -78,7 +86,9 @@ pub fn load_config() -> Result<(Config, State<StderrLock<'static>>)> {
             Config {
                 dir: opts.dir,
                 no_submit: opts.no_submit,
+                info: opts.info,
                 open: opts.open,
+                time_format: opts.time_format.unwrap_or_else(default_time_format),
                 username: opts.username.and_then(|user| {
                     Credential::from_os_string(&mut state, "username", user, opts.username_type)
                 }),
@@ -91,6 +101,10 @@ pub fn load_config() -> Result<(Config, State<StderrLock<'static>>)> {
         },
         state,
     ))
+}
+
+fn default_time_format() -> String {
+    "[month repr:short] [day padding:none], [hour]:[minute]".into()
 }
 
 impl Credential {

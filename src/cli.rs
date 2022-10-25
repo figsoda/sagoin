@@ -16,6 +16,10 @@ pub(crate) struct Opts {
     #[arg(short, long)]
     pub no_submit: bool,
 
+    /// Show information about the project and exit
+    #[arg(short, long)]
+    pub info: bool,
+
     /// Open the project page in a web browser
     #[arg(short, long)]
     pub open: bool,
@@ -35,6 +39,13 @@ pub(crate) struct Opts {
     /// when unspecified
     #[arg(short, long, env = "SAGOIN_CONFIG", value_name = "FILE")]
     pub config: Option<PathBuf>,
+
+    /// Specify how to format the due date, ignored without the --info flag,
+    /// defaults to "[month repr:short] [day padding:none], [hour]:[minute]" when unspecified
+    ///
+    /// See https://time-rs.github.io/book/api/format-description.html for more information
+    #[arg(short, long, env = "SAGOIN_TIME_FORMAT", value_name = "FORMAT")]
+    pub time_format: Option<String>,
 
     /// Specify the username for authentication,
     /// see --username-type for more information

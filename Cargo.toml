@@ -21,6 +21,7 @@ is_executable = "1.0.1"
 java-properties = "1.4.1"
 rpassword = "7.0.0"
 serde = { version = "1.0.147", features = ["derive"] }
+time = { version = "0.3.16", features = ["formatting", "macros", "parsing"] }
 toml = "0.5.9"
 ureq = "2.5.0"
 webbrowser = "0.8.0"
