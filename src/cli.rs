@@ -16,8 +16,12 @@ pub(crate) struct Opts {
     #[arg(short, long)]
     pub no_submit: bool,
 
-    /// Show information about the project and exit
+    /// List files without submitting them
     #[arg(short, long)]
+    pub list_files: bool,
+
+    /// Show information about the project and exit
+    #[arg(short, long, conflicts_with = "list_files")]
     pub info: bool,
 
     /// Open the project page in a web browser

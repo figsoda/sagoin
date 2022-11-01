@@ -18,6 +18,7 @@ use crate::{
 pub struct Config {
     pub dir: Option<PathBuf>,
     pub no_submit: bool,
+    pub list_files: bool,
     pub info: bool,
     pub open: bool,
     pub time_format: String,
@@ -59,6 +60,7 @@ pub fn load_config() -> Result<(Config, State<StderrLock<'static>>)> {
             Config {
                 dir: opts.dir,
                 no_submit: opts.no_submit,
+                list_files: opts.list_files,
                 info: opts.info,
                 open: opts.open,
                 time_format: opts
@@ -86,6 +88,7 @@ pub fn load_config() -> Result<(Config, State<StderrLock<'static>>)> {
             Config {
                 dir: opts.dir,
                 no_submit: opts.no_submit,
+                list_files: opts.list_files,
                 info: opts.info,
                 open: opts.open,
                 time_format: opts.time_format.unwrap_or_else(default_time_format),

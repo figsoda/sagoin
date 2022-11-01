@@ -57,6 +57,7 @@ Arguments:
 
 Options:
   -n, --no-submit                   Don't submit the project
+  -l, --list-files                  List files without submitting them
   -i, --info                        Show information about the project and exit
   -o, --open                        Open the project page in a web browser
       --color <WHEN>                Controls when to use color [default: auto] [possible values: auto, always, never]

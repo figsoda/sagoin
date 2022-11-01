@@ -8,7 +8,8 @@ use zip::{write::FileOptions, ZipWriter};
 use std::{
     env::set_current_dir,
     fs::File,
-    io::{self, Cursor},
+    io::{self, stdout, Cursor, Write},
+    path::Path,
 };
 
 use sagoin::{
@@ -21,6 +22,11 @@ fn main() -> Result<()> {
 
     if let Some(dir) = &cfg.dir {
         set_current_dir(dir).wrap_err("failed to set current dir")?;
+    }
+
+    if cfg.list_files {
+        let mut out = stdout().lock();
+        return walk(|path| writeln!(out, "{}", path.display()).map_err(Into::into));
     }
 
     let props = java_properties::read(File::open(".submit").wrap_err("failed to read .submit")?)
@@ -36,13 +42,7 @@ fn main() -> Result<()> {
         let regular = FileOptions::default();
         let executable = regular.unix_permissions(0o755);
 
-        for entry in WalkBuilder::new(".").hidden(false).build() {
-            let path = entry.wrap_err("failed to read entry")?.into_path();
-            let path = path.strip_prefix(".")?;
-            if !path.is_file() || matches!(path.file_name(), Some(name) if name == ".submitUser") {
-                continue;
-            }
-
+        walk(|path| {
             zip.start_file(
                 path.to_string_lossy(),
                 if path.is_executable() {
@@ -59,7 +59,9 @@ fn main() -> Result<()> {
                 &mut zip,
             )
             .wrap_err("failed to write to the zip file")?;
-        }
+
+            Ok(())
+        })?;
 
         state.submit(
             File::open(".submitUser")
@@ -76,6 +78,18 @@ fn main() -> Result<()> {
 
     if cfg.open {
         webbrowser::open(&get_course_url(&props)?).wrap_err("failed to open the web browser")?;
+    }
+
+    Ok(())
+}
+
+fn walk(mut f: impl FnMut(&Path) -> Result<()>) -> Result<()> {
+    for entry in WalkBuilder::new(".").hidden(false).build() {
+        let path = entry.wrap_err("failed to read entry")?.into_path();
+        let path = path.strip_prefix(".")?;
+        if path.is_file() && matches!(path.file_name(), Some(name) if name != ".submitUser") {
+            f(path)?;
+        }
     }
 
     Ok(())
