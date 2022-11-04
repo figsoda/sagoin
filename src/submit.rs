@@ -24,7 +24,7 @@ impl<W: Write> State<W> {
         &mut self,
         user_props: Props,
         props: &Props,
-        opts: &Config,
+        cfg: &Config,
         zip: &[u8],
         reauth: bool,
     ) -> Result<()> {
@@ -32,8 +32,8 @@ impl<W: Write> State<W> {
             && (!user_props.contains_key("cvsAccount") && !user_props.contains_key("classAccount")
                 || !user_props.contains_key("oneTimePassword"))
         {
-            let user_props = self.negotiate_otp(props, opts)?;
-            return self.submit_project(user_props, props, opts, zip, false);
+            let user_props = self.negotiate_otp(props, cfg)?;
+            return self.submit_project(user_props, props, cfg, zip, false);
         }
 
         let mut parts = Multipart::new();
@@ -43,8 +43,8 @@ impl<W: Write> State<W> {
         }
 
         let parts = parts
-            .add_text("submitClientTool", "sagoin")
-            .add_text("submitClientVersion", env!("CARGO_PKG_VERSION"))
+            .add_text("submitClientTool", &cfg.client_name)
+            .add_text("submitClientVersion", &cfg.client_version)
             .add_stream(
                 "submittedFiles",
                 zip,
@@ -79,8 +79,8 @@ impl<W: Write> State<W> {
                 if let Ok(err) = resp.into_string() {
                     warn!(self, "{err}");
                 }
-                let user_props = self.negotiate_otp(props, opts)?;
-                self.submit_project(user_props, props, opts, zip, false)
+                let user_props = self.negotiate_otp(props, cfg)?;
+                self.submit_project(user_props, props, cfg, zip, false)
             }
 
             Err(ureq::Error::Status(code, resp)) => Err(if let Ok(err) = resp.into_string() {

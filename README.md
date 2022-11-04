@@ -69,6 +69,8 @@ Options:
   -P, --password-type <TYPE>        Specify the type for the password, defaults to text when unspecified [env: SAGOIN_PASSWORD_TYPE=] [possible values: command, file, text]
   -s, --pre-submit-hook <COMMAND>   Command to run before submission [env: SAGOIN_PRE_SUBMIT_HOOK=]
   -S, --post-submit-hook <COMMAND>  Command to run after successful submissions [env: SAGOIN_POST_SUBMIT_HOOK=]
+      --client-name <NAME>          Change the client name used to submit the project [env: SAGOIN_CLIENT_NAME=]
+      --client-version <VERSION>    Change the client version used to submit the project [env: SAGOIN_CLIENT_VERSION=]
   -h, --help                        Print help information (use `-h` for a summary, use `--help` for more detail)
   -V, --version                     Print version information
 ```
@@ -106,6 +108,8 @@ password = "..."
 password_type = "command | file | text"
 pre_submit_hook = "..."
 post_submit_hook = "..."
+client_name = "..."
+client_version = "..."
 ```
 
 

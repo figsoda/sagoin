@@ -26,6 +26,8 @@ pub struct Config {
     pub(crate) password: Option<Credential>,
     pub(crate) pre_submit_hook: Option<OsString>,
     pub(crate) post_submit_hook: Option<OsString>,
+    pub(crate) client_name: String,
+    pub(crate) client_version: String,
 }
 
 pub(crate) enum Credential {
@@ -43,6 +45,8 @@ struct ConfigFile {
     password_type: Option<InputType>,
     pre_submit_hook: Option<OsString>,
     post_submit_hook: Option<OsString>,
+    client_name: Option<String>,
+    client_version: Option<String>,
 }
 
 pub fn load_config() -> Result<(Config, State<StderrLock<'static>>)> {
@@ -83,6 +87,14 @@ pub fn load_config() -> Result<(Config, State<StderrLock<'static>>)> {
                 ),
                 pre_submit_hook: opts.pre_submit_hook.or(cfg.pre_submit_hook),
                 post_submit_hook: opts.post_submit_hook.or(cfg.post_submit_hook),
+                client_name: opts
+                    .client_name
+                    .or(cfg.client_name)
+                    .unwrap_or_else(|| "sagoin".into()),
+                client_version: opts
+                    .client_version
+                    .or(cfg.client_version)
+                    .unwrap_or_else(|| env!("CARGO_PKG_VERSION").into()),
             }
         } else {
             Config {
@@ -100,6 +112,10 @@ pub fn load_config() -> Result<(Config, State<StderrLock<'static>>)> {
                 }),
                 pre_submit_hook: opts.pre_submit_hook,
                 post_submit_hook: opts.post_submit_hook,
+                client_name: opts.client_name.unwrap_or_else(|| "sagoin".into()),
+                client_version: opts
+                    .client_version
+                    .unwrap_or_else(|| env!("CARGO_PKG_VERSION").into()),
             }
         },
         state,

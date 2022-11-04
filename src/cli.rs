@@ -114,6 +114,14 @@ pub(crate) struct Opts {
         verbatim_doc_comment
     )]
     pub post_submit_hook: Option<OsString>,
+
+    /// Change the client name used to submit the project
+    #[arg(long, env = "SAGOIN_CLIENT_NAME", value_name = "NAME")]
+    pub client_name: Option<String>,
+
+    /// Change the client version used to submit the project
+    #[arg(long, env = "SAGOIN_CLIENT_VERSION", value_name = "VERSION")]
+    pub client_version: Option<String>,
 }
 
 #[derive(Clone, Copy, ValueEnum)]
