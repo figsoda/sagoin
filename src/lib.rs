@@ -1,3 +1,14 @@
+//! > **NOTE: using `sagoin` as a library is not supported**
+//!
+//!
+//! `sagoin` is a command-line submission tool for the UMD CS Submission Server.
+//!
+//! ```sh
+//! cargo install sagoin
+//! ```
+//!
+//! Check out the [GitHub repository](https://github.com/figsoda/sagoin) for more information
+
 #![forbid(unsafe_code)]
 
 mod auth;
