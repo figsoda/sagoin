@@ -42,9 +42,16 @@ impl<W: Write> State<W> {
             parts.add_text(k.clone(), v);
         }
 
-        let parts = parts
+        parts
             .add_text("submitClientTool", &cfg.client_name)
-            .add_text("submitClientVersion", &cfg.client_version)
+            .add_text("submitClientVersion", &cfg.client_version);
+
+        let mut fields = cfg.fields.iter();
+        while let (Some(k), Some(v)) = (fields.next(), fields.next()) {
+            parts.add_text(k.clone(), v);
+        }
+
+        let parts = parts
             .add_stream(
                 "submittedFiles",
                 zip,

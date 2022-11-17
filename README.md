@@ -60,6 +60,7 @@ Options:
   -l, --list-files                  List files without submitting them
   -i, --info                        Show information about the project and exit
   -o, --open                        Open the project page in a web browser
+  -f, --field <KEY> <VALUE>         Additional key-value pairs to send to the submit server, this will not affect authentication
       --color <WHEN>                Controls when to use color [default: auto] [possible values: auto, always, never]
   -c, --config <FILE>               Specify the path to the config file, looks for sagoin/config.toml under XDG configuration directories on unix-like systems, and defaults to {FOLDERID_RoamingAppData}\sagoin\config.toml on windows when unspecified [env: SAGOIN_CONFIG=]
   -t, --time-format <FORMAT>        Specify how to format the due date, ignored without the --info flag, defaults to "[month repr:short] [day padding:none], [hour]:[minute]" when unspecified [env: SAGOIN_TIME_FORMAT=]

@@ -28,6 +28,14 @@ pub(crate) struct Opts {
     #[arg(short, long)]
     pub open: bool,
 
+    // waiting for the following issues to make the type more ergonomic
+    // - https://github.com/clap-rs/clap/issues/1682
+    // - https://github.com/clap-rs/clap/issues/1717
+    /// Additional key-value pairs to send to the submit server,
+    /// this will not affect authentication
+    #[arg(short, long = "field", num_args = 2, value_names = ["KEY", "VALUE"])]
+    pub fields: Vec<String>,
+
     #[command(flatten)]
     pub color: Color,
 
@@ -116,10 +124,14 @@ pub(crate) struct Opts {
     pub post_submit_hook: Option<OsString>,
 
     /// Change the client name used to submit the project
+    ///
+    /// This is equivalent to `--field submitClientTool <NAME>`
     #[arg(long, env = "SAGOIN_CLIENT_NAME", value_name = "NAME")]
     pub client_name: Option<String>,
 
     /// Change the client version used to submit the project
+    ///
+    /// This is equivalent to `--field submitClientVersion `VERSION`
     #[arg(long, env = "SAGOIN_CLIENT_VERSION", value_name = "VERSION")]
     pub client_version: Option<String>,
 }

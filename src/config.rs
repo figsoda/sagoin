@@ -21,6 +21,7 @@ pub struct Config {
     pub list_files: bool,
     pub info: bool,
     pub open: bool,
+    pub fields: Vec<String>,
     pub time_format: String,
     pub(crate) username: Option<Credential>,
     pub(crate) password: Option<Credential>,
@@ -67,6 +68,7 @@ pub fn load_config() -> Result<(Config, State<StderrLock<'static>>)> {
                 list_files: opts.list_files,
                 info: opts.info,
                 open: opts.open,
+                fields: opts.fields,
                 time_format: opts
                     .time_format
                     .or(cfg.time_format)
@@ -103,6 +105,7 @@ pub fn load_config() -> Result<(Config, State<StderrLock<'static>>)> {
                 list_files: opts.list_files,
                 info: opts.info,
                 open: opts.open,
+                fields: opts.fields,
                 time_format: opts.time_format.unwrap_or_else(default_time_format),
                 username: opts.username.and_then(|user| {
                     Credential::from_os_string(&mut state, "username", user, opts.username_type)
