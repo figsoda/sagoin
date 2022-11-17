@@ -90,6 +90,8 @@ CVS ignore | ✗ | ✓ | ✓
 Git ignore | ✓ | ✗ | ✗
 Custom credential input | ✓ | ✗ | ✗
 Open project page | ✓ | ✗ | ✗
+Submit hooks | ✓ | ✗ | ✗
+Show project information | ✓ | ✗ | ✗
 
 
 ## Configuration
