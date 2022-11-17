@@ -1,7 +1,7 @@
 //! > **NOTE: using `sagoin` as a library is not supported**
 //!
 //!
-//! `sagoin` is a command-line submission tool for the UMD CS Submission Server.
+//! `sagoin` is a command-line submission tool for the UMD CS Submit Server.
 //!
 //! ```sh
 //! cargo install sagoin
