@@ -4,7 +4,7 @@
 [![version](https://img.shields.io/crates/v/sagoin?logo=rust&style=flat-square)][crate]
 [![deps](https://deps.rs/repo/github/figsoda/sagoin/status.svg?style=flat-square&compact=true)](https://deps.rs/repo/github/figsoda/sagoin)
 [![license](https://img.shields.io/badge/license-AGPL--3.0--or--later-blue?style=flat-square)](https://www.mozilla.org/en-US/MPL/2.0)
-[![ci](https://img.shields.io/github/workflow/status/figsoda/sagoin/ci?label=ci&logo=github-actions&style=flat-square)](https://github.com/figsoda/sagoin/actions?query=workflow:ci)
+[![ci](https://img.shields.io/github/actions/workflow/status/figsoda/sagoin/ci.yml?label=ci&logo=github-actions&style=flat-square)](https://github.com/figsoda/sagoin/actions?query=workflow:ci)
 
 `sagoin` is a command-line submission tool for the UMD CS Submit Server.
 This project is largely inspired by and aims to be the spiritual successor of the [CommandLineSubmission] program from the [marmoset](https://marmoset.cs.umd.edu) project by [Jaime Spacco](https://www.knox.edu/academics/faculty/spacco-jaime), [William Pugh](https://www.cs.umd.edu/~pugh), and others,
