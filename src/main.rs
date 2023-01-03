@@ -1,12 +1,12 @@
 #![forbid(unsafe_code)]
 
-use eyre::{Result, WrapErr};
+use eyre::{bail, Result, WrapErr};
 use ignore::WalkBuilder;
 use is_executable::IsExecutable;
 use zip::{write::FileOptions, ZipWriter};
 
 use std::{
-    env::set_current_dir,
+    env::{current_dir, set_current_dir},
     fs::File,
     io::{self, stdout, Cursor, Write},
     path::Path,
@@ -15,6 +15,7 @@ use std::{
 use sagoin::{
     config::load_config,
     course::{get_course_url, print_course_info},
+    warn,
 };
 
 fn main() -> Result<()> {
@@ -24,12 +25,32 @@ fn main() -> Result<()> {
         set_current_dir(dir).wrap_err("failed to set current dir")?;
     }
 
+    let path = loop {
+        let path = Path::new(".submit");
+        if path.is_file() {
+            break path;
+        }
+
+        let dir = current_dir().wrap_err("failed to get current directory")?;
+        let Some(parent) = dir.parent() else {
+            bail!("failed to find .submit");
+        };
+
+        warn!(
+            state,
+            "no .submit file found in {}, trying {}",
+            dir.display(),
+            parent.display(),
+        );
+        set_current_dir(parent).wrap_err("failed to set current directory")?;
+    };
+
     if cfg.list_files {
         let mut out = stdout().lock();
         return walk(|path| writeln!(out, "{}", path.display()).map_err(Into::into));
     }
 
-    let props = java_properties::read(File::open(".submit").wrap_err("failed to read .submit")?)
+    let props = java_properties::read(File::open(path).wrap_err("failed to read .submit")?)
         .wrap_err("failed to parse .submit")?;
 
     if cfg.info {

@@ -7,8 +7,8 @@ use std::{
 };
 
 pub struct State<W: Write> {
-    pub(crate) color: bool,
-    pub(crate) out: W,
+    pub color: bool,
+    pub out: W,
 }
 
 #[macro_export]
