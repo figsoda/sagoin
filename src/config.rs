@@ -58,8 +58,9 @@ pub fn load_config() -> Result<(Config, State<StderrLock<'static>>)> {
 
     Ok((
         if let Some(path) = opts.config.or_else(find_config_file) {
-            let cfg: ConfigFile = toml::from_slice(
-                &fs::read(&path).wrap_err_with(|| format!("failed to read {}", path.display()))?,
+            let cfg: ConfigFile = toml::from_str(
+                &fs::read_to_string(&path)
+                    .wrap_err_with(|| format!("failed to read {}", path.display()))?,
             )?;
 
             Config {
