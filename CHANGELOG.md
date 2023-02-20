@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.1 - 2023-02-20
+
+### Features
+
+- Allow running sagoin from anywhere in the project directory
+
 ## v0.2.0 - 2022-11-19
 
 ### Features
