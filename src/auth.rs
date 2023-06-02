@@ -6,9 +6,10 @@ use crate::{config::Config, state::State, Props, PropsExt};
 
 impl<W: Write> State<W> {
     pub(crate) fn negotiate_otp(&mut self, props: &Props, cfg: &Config) -> Result<Props> {
-        match props.get_prop("authentication.type")?.as_str() {
-            "ldap" => {
-                writeln!(self.out, "Authenticating with ldap")?;
+        let ty = props.get_prop("authentication.type")?.as_str();
+        match ty {
+            "cas" | "ldap" => {
+                writeln!(self.out, "Authenticating with {ty}")?;
                 let user = self.resolve_username(&cfg.username)?;
                 let pass = self.resolve_password(&cfg.password)?;
 
