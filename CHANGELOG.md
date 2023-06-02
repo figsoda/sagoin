@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.2 - 2023-06-02
+
+### Features
+
+- Support CAS authentication
+
 ## v0.2.1 - 2023-02-20
 
 ### Features
