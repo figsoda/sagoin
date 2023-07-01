@@ -20,9 +20,9 @@ mod cred;
 pub mod state;
 mod submit;
 
-use eyre::{eyre, Result};
-
 use std::collections::HashMap;
+
+use eyre::{eyre, Result};
 
 type Props = HashMap<String, String>;
 

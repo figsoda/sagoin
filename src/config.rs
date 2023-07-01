@@ -1,13 +1,13 @@
-use clap::Parser;
-use eyre::{Result, WrapErr};
-use serde::Deserialize;
-
 use std::{
     ffi::OsString,
     fs,
     io::{StderrLock, Write},
     path::PathBuf,
 };
+
+use clap::Parser;
+use eyre::{Result, WrapErr};
+use serde::Deserialize;
 
 use crate::{
     cli::{InputType, Opts},
@@ -193,9 +193,8 @@ fn find_config_file() -> Option<PathBuf> {
 mod tests {
     use std::ffi::OsString;
 
-    use crate::{cli::InputType, state::State};
-
     use super::Credential;
+    use crate::{cli::InputType, state::State};
 
     #[test]
     fn credential_from_fallback_none() {

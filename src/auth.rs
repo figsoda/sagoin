@@ -1,6 +1,6 @@
-use eyre::{eyre, Result, WrapErr};
-
 use std::{fs, io::Write};
+
+use eyre::{eyre, Result, WrapErr};
 
 use crate::{config::Config, state::State, Props, PropsExt};
 

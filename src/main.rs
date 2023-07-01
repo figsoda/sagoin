@@ -1,10 +1,5 @@
 #![forbid(unsafe_code)]
 
-use eyre::{bail, Result, WrapErr};
-use ignore::WalkBuilder;
-use is_executable::IsExecutable;
-use zip::{write::FileOptions, ZipWriter};
-
 use std::{
     env::{current_dir, set_current_dir},
     fs::File,
@@ -12,11 +7,15 @@ use std::{
     path::Path,
 };
 
+use eyre::{bail, Result, WrapErr};
+use ignore::WalkBuilder;
+use is_executable::IsExecutable;
 use sagoin::{
     config::load_config,
     course::{get_course_url, print_course_info},
     warn,
 };
+use zip::{write::FileOptions, ZipWriter};
 
 fn main() -> Result<()> {
     let (cfg, mut state) = load_config()?;

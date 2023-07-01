@@ -1,7 +1,7 @@
+use std::{ffi::OsString, path::PathBuf};
+
 use clap::{Parser, ValueEnum};
 use concolor_clap::{color_choice, Color};
-
-use std::{ffi::OsString, path::PathBuf};
 
 /// A command-line submission tool for the UMD CS Submit Server
 /// https://github.com/figsoda/sagoin

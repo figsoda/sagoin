@@ -1,11 +1,11 @@
-use eyre::{Result, WrapErr};
-use rpassword::read_password;
-
 use std::{
     fs::read_to_string,
     io::{self, Write},
     process::{Output, Stdio},
 };
+
+use eyre::{Result, WrapErr};
+use rpassword::read_password;
 
 use crate::{cmd, config::Credential, state::State, warn};
 
@@ -63,9 +63,9 @@ impl<W: Write> State<W> {
 
 #[cfg(test)]
 mod tests {
-    use tempfile::NamedTempFile;
-
     use std::io::Write;
+
+    use tempfile::NamedTempFile;
 
     use crate::{config::Credential, state::State};
 

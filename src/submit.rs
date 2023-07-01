@@ -1,7 +1,7 @@
+use std::io::Write;
+
 use eyre::{eyre, Result, WrapErr};
 use multipart::client::lazy::Multipart;
-
-use std::io::Write;
 
 use crate::{config::Config, state::State, warn, Props, PropsExt};
 

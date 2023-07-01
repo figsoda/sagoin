@@ -1,8 +1,8 @@
+use std::io::{stdout, Write};
+
 use eyre::{eyre, Report, Result, WrapErr};
 use icalendar::parser::{read_calendar_simple, unfold, Component};
 use time::{format_description, macros::format_description, PrimitiveDateTime};
-
-use std::io::{stdout, Write};
 
 use crate::{Props, PropsExt};
 

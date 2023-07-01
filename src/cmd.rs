@@ -1,6 +1,6 @@
-use eyre::{eyre, Result};
-
 use std::{ffi::OsString, io::Write, process::Command};
+
+use eyre::{eyre, Result};
 
 use crate::state::State;
 
@@ -37,9 +37,8 @@ impl<W: Write> State<W> {
 
 #[cfg(test)]
 mod tests {
-    use crate::state::State;
-
     use super::shell;
+    use crate::state::State;
 
     #[test]
     fn shell_echo() {

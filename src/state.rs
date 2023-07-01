@@ -1,10 +1,10 @@
-use color_eyre::config::{HookBuilder, Theme};
-use eyre::{Result, WrapErr};
-
 use std::{
     fmt::Display,
     io::{self, StderrLock, Write},
 };
+
+use color_eyre::config::{HookBuilder, Theme};
+use eyre::{Result, WrapErr};
 
 pub struct State<W: Write> {
     pub color: bool,
