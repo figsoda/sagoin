@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.3 - 2023-07-31
+
+### Features
+
+- Ignore `.git`
+
 ## v0.2.2 - 2023-06-02
 
 ### Features
