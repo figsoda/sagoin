@@ -15,20 +15,20 @@ categories = ["command-line-utilities"]
 concolor = "0.1.1"
 concolor-clap = { version = "0.1.0", features = ["api"] }
 eyre = "0.6.8"
-icalendar = { version = "0.15.4", features = ["parser"] }
+icalendar = { version = "0.15.6", features = ["parser"] }
 ignore = "0.4.20"
 is_executable = "1.0.1"
 java-properties = "2.0.0"
 rpassword = "7.2.0"
-serde = { version = "1.0.163", features = ["derive"] }
-time = { version = "0.3.21", features = ["formatting", "macros", "parsing"] }
-toml = { version = "0.7.4", default-features = false, features = ["parse"] }
-ureq = "2.6.2"
+serde = { version = "1.0.180", features = ["derive"] }
+time = { version = "0.3.24", features = ["formatting", "macros", "parsing"] }
+toml = { version = "0.7.6", default-features = false, features = ["parse"] }
+ureq = "2.7.1"
 webbrowser = "0.8.10"
 zip = { version = "0.6.6", default-features = false }
 
 [dependencies.clap]
-version = "4.3.1"
+version = "4.3.19"
 features = ["cargo", "derive", "env", "unicode", "wrap_help"]
 
 [dependencies.color-eyre]
@@ -42,19 +42,19 @@ default-features = false
 features = ["client"]
 
 [target."cfg(unix)".dependencies]
-xdg = "2.5.0"
+xdg = "2.5.2"
 
 [target."cfg(windows)".dependencies]
 dirs = "5.0.1"
 
 [build-dependencies]
-clap = { version = "4.3.1", features = ["derive", "env"] }
-clap_complete = "4.3.1"
+clap = { version = "4.3.19", features = ["derive", "env"] }
+clap_complete = "4.3.2"
 clap_mangen = "0.2.12"
 concolor-clap = "0.1.0"
 
 [dev-dependencies]
-tempfile = "3.5.0"
+tempfile = "3.7.0"
 
 [profile.release]
 lto = true
