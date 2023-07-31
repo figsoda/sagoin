@@ -104,7 +104,11 @@ fn main() -> Result<()> {
 }
 
 fn walk(mut f: impl FnMut(&Path) -> Result<()>) -> Result<()> {
-    for entry in WalkBuilder::new(".").hidden(false).build() {
+    for entry in WalkBuilder::new(".")
+        .hidden(false)
+        .filter_entry(|entry| entry.depth() != 1 || entry.file_name() != ".git")
+        .build()
+    {
         let path = entry.wrap_err("failed to read entry")?.into_path();
         let path = path.strip_prefix(".")?;
         if path.is_file() && matches!(path.file_name(), Some(name) if name != ".submitUser") {
