@@ -15,7 +15,7 @@ use sagoin::{
     course::{get_course_url, print_course_info},
     warn,
 };
-use zip::{write::FileOptions, ZipWriter};
+use zip::{write::SimpleFileOptions, ZipWriter};
 
 fn main() -> Result<()> {
     let (cfg, mut state) = load_config()?;
@@ -59,7 +59,7 @@ fn main() -> Result<()> {
     if !cfg.no_submit {
         let mut zip = ZipWriter::new(Cursor::new(Vec::new()));
         zip.set_comment("");
-        let regular = FileOptions::default();
+        let regular = SimpleFileOptions::default();
         let executable = regular.unix_permissions(0o755);
 
         walk(|path| {
