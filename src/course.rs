@@ -142,8 +142,7 @@ fn get_course_props<A>(
         .into_string()
         .wrap_err("failed to parse the course calendar")?,
     ))
-    .map_err(|e| eyre!("{e}").wrap_err("failed to parse the course calendar"))?
-    .get(0)
+    .map_err(|e| eyre!("{e}").wrap_err("failed to parse the course calendar"))?.first()
     .and_then(|root| {
         root.components
             .iter()
