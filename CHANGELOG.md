@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.4 - 2024-09-16
+
+### Fixes
+
+- Fix build with Rust 1.80
+
 ## v0.2.3 - 2023-07-31
 
 ### Features

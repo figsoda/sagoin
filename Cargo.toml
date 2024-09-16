@@ -1,6 +1,6 @@
 [package]
 name = "sagoin"
-version = "0.2.3"
+version = "0.2.4"
 authors = ["figsoda <figsoda@pm.me>"]
 edition = "2021"
 description = "A command-line submission tool for the UMD CS Submit Server"
