@@ -25,7 +25,7 @@ time = { version = "0.3.36", features = ["formatting", "macros", "parsing"] }
 toml = { version = "0.8.19", default-features = false, features = ["parse"] }
 ureq = "2.10.1"
 webbrowser = "1.0.2"
-zip = { version = "2.2.0", default-features = false }
+zip = { version = "2.3.0", default-features = false }
 
 [dependencies.clap]
 version = "4.5.17"
