@@ -19,7 +19,7 @@ icalendar = { version = "0.16.8", features = ["parser"] }
 ignore = "0.4.23"
 is_executable = "1.0.3"
 java-properties = "2.0.0"
-rpassword = "7.3.1"
+rpassword = "7.5.0"
 serde = { version = "1.0.210", features = ["derive"] }
 time = { version = "0.3.47", features = ["formatting", "macros", "parsing"] }
 toml = { version = "0.8.19", default-features = false, features = ["parse"] }
